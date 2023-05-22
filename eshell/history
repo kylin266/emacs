@@ -1,0 +1,25 @@
+ls
+kubectl get ns
+clear
+kubectl get ns
+kubectl -i -t -n fr-ql6625-colvemat-develop exec api-develop-d9f7bf8c9-g6pkf sh -c "sh" 
+kubectl -i -t -n fr-ql6625-colvemat-develop exec api-develop-d9f7bf8c9-g6pkf sh -c "/home/node/app" 
+kubectl -i -t -n fr-ql6625-colvemat-develop exec api-develop-d9f7bf8c9-g6pkf sh -c "clear; sh" 
+kubectl -i -t -n fr-ql6625-colvemat-develop exec api-develop-d9f7bf8c9-g6pkf -c api-develop sh -c "clear; sh" 
+kubectl -i -t -n fr-ql6625-colvemat-develop exec api-develop-d9f7bf8c9-g6pkf sh -c "clear;" 
+kubectl -n fr-ql6625-colvemat-develop exec api-develop-d9f7bf8c9-g6pkf sh -c "clear;" 
+kubectl -n fr-ql6625-colvemat-develop exec api-develop-d9f7bf8c9-g6pkf -- /bin/sh
+kubectl -t -n fr-ql6625-colvemat-develop exec api-develop-d9f7bf8c9-g6pkf -- /bin/bash
+kubectl -n fr-ql6625-colvemat-develop exec -i -t api-develop-d9f7bf8c9-g6pkf -- /bin/bash
+ibmcloud 
+&& chmod 600 "$KUBECONFIG"
+/bin/sh
+ls
+exit
+mc
+clear
+cd ~/Documents/
+mkdir gpt-ext
+cd gpt-ext/
+ls
+ls
