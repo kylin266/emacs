@@ -134,9 +134,32 @@
   (add-hook 'vterm-mode-hook #'evil-emacs-state)
   (define-key vterm-mode-map (kbd "<escape>") #'vterm-send-escape)
   (define-key vterm-mode-map (kbd "ESC") #'vterm-send-escape)
+  (define-key vterm-mode-map (kbd "C-z") #'my/vterm-toggle-vim)
   (define-key vterm-mode-map (kbd "s-o") #'other-window)
   (define-key vterm-mode-map (kbd "s-v") #'vterm-yank)
   (define-key vterm-mode-map (kbd "C-c C-e") #'vterm-copy-mode))
+
+;; evil-collection registers vterm as an insert-state mode, so a stray ESC or
+;; mouse drag drops the buffer into normal/visual state and keys stop reaching
+;; the program.  Pin terminals to Emacs state unless `my/vterm-toggle-vim' (C-z)
+;; explicitly asked for vim keys in that buffer.
+(defvar-local my/vterm-vim nil "Non-nil when vim keys were requested in this terminal.")
+(defun my/vterm-stay-emacs ()
+  (when (and (derived-mode-p 'vterm-mode) (not my/vterm-vim) (not (eq evil-state 'emacs)))
+    (evil-emacs-state)))
+(defun my/vterm-toggle-vim ()
+  "Toggle vim keys in this terminal (for scrolling / copying)."
+  (interactive)
+  (setq my/vterm-vim (not my/vterm-vim))
+  (if my/vterm-vim (evil-normal-state) (evil-emacs-state))
+  (message "vterm: %s" (if my/vterm-vim "vim keys ON (C-z to send keys to the program again)" "keys go to the program")))
+(with-eval-after-load 'evil
+  (setq evil-insert-state-modes (delq 'vterm-mode evil-insert-state-modes))
+  (add-to-list 'evil-emacs-state-modes 'vterm-mode)
+  (dolist (h '(evil-normal-state-entry-hook evil-insert-state-entry-hook evil-visual-state-entry-hook evil-motion-state-entry-hook))
+    (add-hook h #'my/vterm-stay-emacs)))
+(with-eval-after-load 'evil-collection-vterm
+  (evil-set-initial-state 'vterm-mode 'emacs))
 
 (defun my/terminal ()
   "Open vterm when its module is available, otherwise eat."
