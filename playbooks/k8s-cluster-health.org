@@ -1,5 +1,5 @@
 #+TITLE: Kubernetes cluster health (current context)
-#+PROPERTY: header-args:bash :results output verbatim :exports both :eval yes :noweb yes :session *playbook* :async yes
+#+PROPERTY: header-args:bash :results output verbatim :exports both :eval yes :noweb yes :session *k8s-cluster-health* :async yes
 #+STARTUP: showall
 
 Five-minute read of whichever cluster =kubectl= points at. Switch with =SPC o K= first.

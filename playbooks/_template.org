@@ -1,6 +1,6 @@
 #+TITLE: {{name}}
 #+DATE: {{date}}
-#+PROPERTY: header-args:bash :results output verbatim :exports both :eval yes :noweb yes :session *playbook* :async yes
+#+PROPERTY: header-args:bash :results output verbatim :exports both :eval yes :noweb yes :session *_template* :async yes
 #+STARTUP: showall
 
 Purpose: one line on what this playbook checks and when to run it.

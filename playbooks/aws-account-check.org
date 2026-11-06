@@ -1,5 +1,5 @@
 #+TITLE: AWS account check (current AWS_PROFILE)
-#+PROPERTY: header-args:bash :results output verbatim :exports both :eval yes :noweb yes :session *playbook* :async yes
+#+PROPERTY: header-args:bash :results output verbatim :exports both :eval yes :noweb yes :session *aws-account-check* :async yes
 #+STARTUP: showall
 
 Read-only sweep of the account behind =AWS_PROFILE= (set it with =SPC o a=).
