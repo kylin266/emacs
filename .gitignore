@@ -19,3 +19,6 @@
 # compiled tree-sitter grammars (M-x my/install-treesit-grammars)
 /tree-sitter/
 /bin/claude-env.local
+
+# playbook run reports (contain live data)
+runs/

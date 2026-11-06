@@ -102,6 +102,63 @@ results, and tools see no terminal so they never page."
         (setq killed (1+ killed))))
     (message "killed %d playbook session(s); the next block starts a fresh one" killed)))
 
+(defun my/playbook--result-text (res-pos)
+  "Return the result text that starts at RES-POS, or nil."
+  (when res-pos
+    (save-excursion
+      (goto-char res-pos)
+      (forward-line 1)
+      (let ((r (ignore-errors (org-babel-read-result))))
+        (cond ((null r) nil)
+              ((stringp r) r)
+              (t (format "%S" r)))))))
+
+(defun my/playbook-report ()
+  "Gather every block's result in this playbook into a dated report and open it beside.
+Report goes to runs/<date>-<playbook>.org next to the playbook (never committed)."
+  (interactive)
+  (unless (derived-mode-p 'org-mode) (user-error "Not in a playbook"))
+  (let* ((src buffer-file-name)
+         (name (file-name-base src))
+         (dir (expand-file-name "runs" (file-name-directory src)))
+         (stamp (format-time-string "%Y-%m-%d-%H%M"))
+         (out (expand-file-name (format "%s-%s.org" (format-time-string "%Y-%m-%d") name) dir))
+         (findings 0) (ok 0) (running 0) (missing 0) sections)
+    (org-babel-map-src-blocks nil
+      (let* ((heading (string-join (append (org-get-outline-path) (list (org-get-heading t t t t))) " / "))
+             (res (my/playbook--result-text (org-babel-where-is-src-block-result)))
+             (lines (and res (seq-remove #'string-empty-p (split-string (string-trim res) "\n"))))
+             (status (cond ((null res) (cl-incf missing) 'missing)
+                           ((and (= (length lines) 1) (string-match-p "\\`[0-9a-f-]\\{32,36\\}\\'" (car lines))) (cl-incf running) 'running)
+                           ((seq-every-p (lambda (l) (or (string-prefix-p "(" l) (string-prefix-p "==" l))) lines) (cl-incf ok) 'ok)
+                           (t (cl-incf findings) 'finding))))
+        (push (list heading status res) sections)))
+    (setq sections (nreverse sections))
+    (make-directory dir t)
+    (with-temp-file out
+      (insert (format "#+TITLE: %s · %s\n#+STARTUP: showall\n\n" name stamp))
+      (insert (format "Findings: %d   OK: %d   still running: %d   not run: %d\n" findings ok running missing))
+      (when (getenv "AWS_PROFILE") (insert (format "AWS_PROFILE=%s  " (getenv "AWS_PROFILE"))))
+      (when my/kube-context-cache (insert (format "kube=%s" my/kube-context-cache)))
+      (insert "\n\n")
+      (dolist (sec sections)
+        (pcase-let ((`(,heading ,status ,res) sec))
+          (when (eq status 'finding)
+            (insert (format "* %s\n#+begin_example\n%s\n#+end_example\n\n" heading (string-trim res))))))
+      (insert "* Passed\n")
+      (dolist (sec sections)
+        (pcase-let ((`(,heading ,status ,res) sec))
+          (when (eq status 'ok) (insert (format "- %s  %s\n" heading (string-trim (or res "")))))))
+      (when (> (+ running missing) 0)
+        (insert "\n* Not finished\n")
+        (dolist (sec sections)
+          (pcase-let ((`(,heading ,status ,_) sec))
+            (when (memq status '(running missing)) (insert (format "- %s  (%s)\n" heading status)))))))
+    (let ((buf (find-file-noselect out)))
+      (with-current-buffer buf (revert-buffer t t t))
+      (pop-to-buffer buf '((display-buffer-in-side-window) (side . right) (window-width . 0.5)))
+      (message "report: %s  (%d findings, %d ok)" (abbreviate-file-name out) findings ok))))
+
 (defun my/playbook-new (name &optional dir)
   "Create a playbook NAME from the template in DIR (default: first playbook dir)."
   (interactive
@@ -133,7 +190,8 @@ results, and tools see no terminal so they never page."
   (define-key org-mode-map (kbd "C-c p s") #'my/playbook-run-subtree)
   (define-key org-mode-map (kbd "C-c p c") #'my/playbook-clear-results)
   (define-key org-mode-map (kbd "C-c p y") #'my/playbook-copy-block)
-  (define-key org-mode-map (kbd "C-c p k") #'my/playbook-kill-session))
+  (define-key org-mode-map (kbd "C-c p k") #'my/playbook-kill-session)
+  (define-key org-mode-map (kbd "C-c p r") #'my/playbook-report))
 
 (provide 'my-playbooks)
 ;;; my-playbooks.el ends here

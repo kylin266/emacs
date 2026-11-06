@@ -4,7 +4,8 @@ Each `.org` file here is a runbook whose shell blocks run in place: open it with
 `SPC o p`, put the cursor on a block and press `, e` (or `C-c C-c`). Results
 appear under the block, so the file is both the procedure and the last reading.
 `, a` runs the whole file, `, c` clears every result, `, y` copies a block's
-command to paste in a terminal or a chat, `, k` kills a runaway run.
+command to paste in a terminal or a chat, `, k` kills a runaway run, `, r` writes a
+report page (`runs/<date>-<name>.org`, git-ignored) with findings first and opens it beside.
 
 Blocks run in a background bash session (`:session … :async yes` in the file's
 `#+PROPERTY` line), so Emacs stays usable while a slow check runs; the result

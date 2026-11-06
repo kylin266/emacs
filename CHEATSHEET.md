@@ -64,7 +64,7 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 
 - `SPC o p` open a playbook. `SPC o P` new one from the template.
 - `, e` or `C-c C-c` run the block under cursor. `, a` run the whole file (asks). `, s` run this heading.
-- `, c` clear all results. `, y` copy the block's command. `, n` / `, p` next / previous block. `, k` kill a run that is taking too long.
+- `, c` clear all results. `, y` copy the block's command. `, n` / `, p` next / previous block. `, k` kill a run that is taking too long. `, r` gather all results into a report page on the right (findings first, passed list below).
 - Blocks run in the background: Emacs stays usable, the result appears under the block when it finishes.
 - `, '` edit the block in its own shell buffer (`C-c C-c` to come back).
 - `TAB` fold / unfold a heading. `S-TAB` cycle the whole file.

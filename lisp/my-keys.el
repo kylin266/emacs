@@ -137,6 +137,7 @@
   "c" '(my/playbook-clear-results :wk "clear results")
   "y" '(my/playbook-copy-block :wk "copy block")
   "k" '(my/playbook-kill-session :wk "kill runaway run")
+  "r" '(my/playbook-report :wk "report page")
   "'" '(org-edit-special :wk "edit block")
   "t" '(org-todo :wk "todo")
   "l" '(org-insert-link :wk "link")
