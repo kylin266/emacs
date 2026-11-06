@@ -131,10 +131,8 @@
   ;; Terminal buffers stay in Emacs state so every key, ESC included, reaches
   ;; the program (Claude Code uses ESC to interrupt). C-z toggles vim keys
   ;; back on for scrolling; C-c C-e is copy mode.
-  (add-hook 'vterm-mode-hook #'evil-emacs-state)
   (define-key vterm-mode-map (kbd "<escape>") #'vterm-send-escape)
   (define-key vterm-mode-map (kbd "ESC") #'vterm-send-escape)
-  (define-key vterm-mode-map (kbd "C-z") #'my/vterm-toggle-vim)
   (define-key vterm-mode-map (kbd "s-o") #'other-window)
   (define-key vterm-mode-map (kbd "s-v") #'vterm-yank)
   (define-key vterm-mode-map (kbd "C-c C-e") #'vterm-copy-mode))
@@ -145,8 +143,14 @@
 ;; explicitly asked for vim keys in that buffer.
 (defvar-local my/vterm-vim nil "Non-nil when vim keys were requested in this terminal.")
 (defun my/vterm-stay-emacs ()
+  "Snap a terminal back to Emacs state after any command that left it.
+Runs from a buffer-local `post-command-hook' (evil's own state-entry hooks
+cannot change state: `evil-state' is let-bound while they run)."
   (when (and (derived-mode-p 'vterm-mode) (not my/vterm-vim) (not (eq evil-state 'emacs)))
     (evil-emacs-state)))
+(defun my/vterm-setup-evil ()
+  (evil-emacs-state)
+  (add-hook 'post-command-hook #'my/vterm-stay-emacs nil t))
 (defun my/vterm-toggle-vim ()
   "Toggle vim keys in this terminal (for scrolling / copying)."
   (interactive)
@@ -156,10 +160,16 @@
 (with-eval-after-load 'evil
   (setq evil-insert-state-modes (delq 'vterm-mode evil-insert-state-modes))
   (add-to-list 'evil-emacs-state-modes 'vterm-mode)
-  (dolist (h '(evil-normal-state-entry-hook evil-insert-state-entry-hook evil-visual-state-entry-hook evil-motion-state-entry-hook))
-    (add-hook h #'my/vterm-stay-emacs)))
+  (add-hook 'vterm-mode-hook #'my/vterm-setup-evil))
+(defun my/vterm-after-evil-collection (&rest _)
+  "evil-collection registers vterm as insert-state; undo that after its setup."
+  (evil-set-initial-state 'vterm-mode 'emacs)
+  (setq evil-insert-state-modes (delq 'vterm-mode evil-insert-state-modes))
+  (evil-define-key 'emacs vterm-mode-map (kbd "C-z") #'my/vterm-toggle-vim)
+  (evil-define-key '(normal visual motion) vterm-mode-map (kbd "C-z") #'my/vterm-toggle-vim))
 (with-eval-after-load 'evil-collection-vterm
-  (evil-set-initial-state 'vterm-mode 'emacs))
+  (advice-add 'evil-collection-vterm-setup :after #'my/vterm-after-evil-collection)
+  (when (featurep 'vterm) (my/vterm-after-evil-collection)))
 
 (defun my/terminal ()
   "Open vterm when its module is available, otherwise eat."
