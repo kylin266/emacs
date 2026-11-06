@@ -32,6 +32,7 @@
   (claude-code-ide-vterm-anti-flicker t)
   (claude-code-ide-enable-execute-code nil)   ; Claude may read Emacs state, not eval elisp
   :config
+  (require 'web-server)   ; the Emacs-tools MCP server needs it loaded first
   ;; Expose xref / imenu / project lookups to Claude as MCP tools.
   (claude-code-ide-emacs-tools-setup))
 
