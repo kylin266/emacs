@@ -111,12 +111,13 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 
 ## AI, when you want it
 
-- `SPC o c` toggle Claude Code beside the code (project root, same login as the terminal; Shift+Tab cycles permission mode, `ESC` interrupts).
-- The Claude pane has no vim modes: every key goes to Claude. To scroll or copy: `C-c C-e` (copy mode, `q` leaves). `C-z` toggles vim keys on and off if you ever need them.
-- `SPC a s` send a prompt with the current file and line as context. Select with `v` then `SPC a r` sends the region.
-- `SPC a f` ask Claude Code to fix the error under cursor. `SPC a k` kill the session.
+- `SPC o c` Claude Code in a side window on the right, connected to Emacs as an IDE: it sees the file you are in, your selection (`v`) and the diagnostics, and its edits open as a diff you accept or reject.
+- `SPC a s` type a prompt from the code buffer. `SPC a i` inserts an `@file` reference. `SPC a t` hides / shows the window.
+- Diff review when Claude edits: `n` / `p` next / previous hunk, `a` accept, `r` reject, `q` finish.
+- `SPC a c` continue the last conversation, `SPC a r` pick an older session, `SPC a l` list sessions, `SPC a k` stop, `SPC a m` the full menu.
+- The Claude pane has no vim modes: every key goes to Claude, `ESC` interrupts, `Shift+Tab` cycles permissions. To scroll or copy: `C-c C-e` (copy mode, `q` leaves). `s-o` jumps out.
 - Inside a client workspace Claude Code runs with its own config dir (`bin/claude-env.local`), as in the shell.
-- `SPC o g` gptel chat buffer (needs a key in `~/.authinfo.gpg`), `SPC a R` rewrite the selection, `SPC a m` the gptel menu.
+- `SPC a g` gptel chat buffer (needs a key in `~/.authinfo.gpg`), `SPC a R` rewrite the selection, `SPC a G` the gptel menu.
 
 ## Org notes
 

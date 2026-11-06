@@ -67,8 +67,8 @@
   "oe" '(eshell :wk "eshell")
   "os" '(my/ssh-shell :wk "ssh host")
   "oS" '(my/ssh-dired :wk "ssh dired")
-  "oc" '(claude-code-toggle :wk "claude code")
-  "oC" '(claude-code :wk "claude code (new)")
+  "oc" '(claude-code-ide :wk "claude code (ide)")
+  "oC" '(claude-code-ide-continue :wk "claude: continue last")
   "og" '(gptel :wk "gptel chat")
   "oG" '(gptel-menu :wk "gptel menu")
   "o-" '(dired-jump :wk "dired here")
@@ -91,10 +91,20 @@
   "ce" 'eval-last-sexp "cE" 'eval-buffer
 
   "a"  '(:ignore t :wk "ai")
-  "ac" 'claude-code-toggle "aC" 'claude-code
-  "as" 'claude-code-send-command "ar" 'claude-code-send-region
-  "af" 'claude-code-fix-error-at-point "ak" 'claude-code-kill
-  "ag" 'gptel "am" 'gptel-menu "aR" 'gptel-rewrite "aa" 'gptel-add "aS" 'gptel-send
+  "aa" '(claude-code-ide :wk "start / show")
+  "at" '(claude-code-ide-toggle :wk "toggle window")
+  "as" '(claude-code-ide-send-prompt :wk "send prompt")
+  "ai" '(claude-code-ide-insert-at-mentioned :wk "insert @file ref")
+  "ac" '(claude-code-ide-continue :wk "continue last")
+  "ar" '(claude-code-ide-resume :wk "resume a session")
+  "al" '(claude-code-ide-list-sessions :wk "sessions")
+  "ab" '(claude-code-ide-switch-to-buffer :wk "claude buffer")
+  "ae" '(claude-code-ide-send-escape :wk "send ESC")
+  "ak" '(claude-code-ide-stop :wk "stop session")
+  "aK" '(claude-code-ide-stop-all :wk "stop all")
+  "am" '(claude-code-ide-menu :wk "menu")
+  "a?" '(claude-code-ide-check-status :wk "status")
+  "ag" '(gptel :wk "gptel chat") "aG" '(gptel-menu :wk "gptel menu") "aR" '(gptel-rewrite :wk "gptel rewrite")
 
   "h"  '(:ignore t :wk "help")
   "hf" 'helpful-callable "hv" 'helpful-variable "hk" 'helpful-key

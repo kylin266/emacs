@@ -49,7 +49,7 @@ Do not start Emacs from the Dock while the daemon runs; that launches a second, 
 - `lisp/my-evil.el` evil everywhere, `SPC` leader via general. `my-completion.el` vertico, orderless, consult, embark, corfu, yasnippet.
 - `lisp/my-lang.el` tree-sitter modes, eglot per language, yaml-mode with Kubernetes and schemastore schemas, terraform-mode, ansible, apheleia formatting.
 - `lisp/my-devops.el` kubel, docker, kube context and AWS profile switchers (shown in the modeline), `kubectl apply/diff/dry-run` on the current buffer, TRAMP, ssh helpers, eat terminal.
-- `lisp/my-playbooks.el` the playbook runner. `lisp/my-ai.el` Claude Code in a terminal next to the code, gptel for in-buffer chat.
+- `lisp/my-playbooks.el` the playbook runner. `lisp/my-ai.el` claude-code-ide (Claude Code as an IDE over MCP: context, diagnostics, diffs) and gptel.
 - `lisp/my-keys.el` the whole leader map in one file. `lisp/local.el` (git-ignored, see `local.el.example`) for machine-specific bits.
 - `playbooks/` runnable org runbooks, see its README. `playbooks/local/` is git-ignored.
 - `snippets/` yasnippet: `deploy`, `svc`, `ing`, `cron`, `schema`, `job` in YAML; `res`, `var`, `mod` in Terraform; `strict` in shell.
@@ -61,7 +61,7 @@ Do not start Emacs from the Dock while the daemon runs; that launches a second, 
 - `SPC o p` open a playbook, `SPC o P` new one from the template. In a playbook: `, e` run block, `, a` run file, `, c` clear results, `, y` copy the command.
 - `SPC o k` kubel, `SPC o K` switch kube context, `SPC o a` set AWS_PROFILE, `SPC o d` docker, `SPC o t` terminal, `SPC o s` ssh to a host from `~/.ssh/config`.
 - `SPC k d` / `SPC k D` / `SPC k a` kubectl dry-run / diff / apply the YAML buffer (apply and delete ask, and name the context).
-- `SPC o c` Claude Code beside the code, `SPC a s` send it a prompt, `SPC a f` fix the error at point. `SPC o g` gptel chat.
+- `SPC o c` Claude Code beside the code as an IDE, `SPC a s` send it a prompt, `SPC a m` its menu. `SPC a g` gptel chat.
 - `SPC g g` magit, `SPC p p` projects, `SPC /` ripgrep the project, `SPC c a` code action, `SPC c r` rename, `SPC c x` diagnostics.
 - `s-p` find file in project, `s-F` ripgrep, `s-b` buffers, `s-s` save.
 

@@ -1,22 +1,39 @@
 ;;; my-ai.el --- LLM on demand, never in the way -*- lexical-binding: t -*-
 ;;
 ;; Two doors:
-;;  - claude-code: the Claude Code CLI in an eat terminal next to the code
-;;    (SPC o c).  Uses the existing subscription, no API key.  bin/claude
-;;    sources an optional bin/claude-env.local (git-ignored) so a client
-;;    workspace can get its own CLAUDE_CONFIG_DIR, like the shell function in ~/.zshrc.
+;;  - claude-code-ide: Claude Code in a vterm side window, connected to Emacs
+;;    as an IDE over MCP (SPC o c).  Claude sees the current file, selection
+;;    and flymake diagnostics, opens its edits as ediff diffs you accept or
+;;    reject, and can call a few Emacs tools (xref, imenu, project).  Uses the
+;;    existing subscription, no API key.  bin/claude sources an optional
+;;    bin/claude-env.local (git-ignored) so a client workspace can get its own
+;;    CLAUDE_CONFIG_DIR, like the shell function in ~/.zshrc.
 ;;  - gptel: chat/rewrite in any buffer (SPC o g).  Needs an API key in
 ;;    ~/.authinfo.gpg: `machine api.anthropic.com login apikey password sk-...'.
 ;;    A LiteLLM backend for client work can be added in lisp/local.el.
 
-(use-package claude-code
-  :vc (:url "https://github.com/stevemolitor/claude-code.el" :rev :newest)
-  :commands (claude-code claude-code-toggle claude-code-send-command claude-code-send-region claude-code-fix-error-at-point)
+(use-package claude-code-ide
+  :vc (:url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
+  :commands (claude-code-ide claude-code-ide-toggle claude-code-ide-menu
+             claude-code-ide-send-prompt claude-code-ide-continue claude-code-ide-resume
+             claude-code-ide-stop claude-code-ide-stop-all claude-code-ide-list-sessions
+             claude-code-ide-insert-at-mentioned claude-code-ide-switch-to-buffer
+             claude-code-ide-send-escape claude-code-ide-check-status)
   :custom
-  (claude-code-terminal-backend (if (require 'vterm nil t) 'vterm 'eat))
-  (claude-code-program (expand-file-name "bin/claude" user-emacs-directory))
+  (claude-code-ide-cli-path (expand-file-name "bin/claude" user-emacs-directory))
+  (claude-code-ide-terminal-backend 'vterm)
+  (claude-code-ide-use-side-window t)
+  (claude-code-ide-window-side 'right)
+  (claude-code-ide-window-width 100)
+  (claude-code-ide-focus-on-open t)
+  (claude-code-ide-use-ide-diff t)
+  (claude-code-ide-show-claude-window-in-ediff t)
+  (claude-code-ide-diagnostics-backend 'flymake)
+  (claude-code-ide-vterm-anti-flicker t)
+  (claude-code-ide-enable-execute-code nil)   ; Claude may read Emacs state, not eval elisp
   :config
-  (claude-code-mode 1))
+  ;; Expose xref / imenu / project lookups to Claude as MCP tools.
+  (claude-code-ide-emacs-tools-setup))
 
 (use-package gptel
   :commands (gptel gptel-send gptel-menu gptel-rewrite gptel-add)
