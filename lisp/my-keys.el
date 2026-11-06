@@ -143,6 +143,17 @@
   "v" '((lambda () (interactive) (compile "terraform validate")) :wk "validate")
   "p" '((lambda () (interactive) (compile "terraform plan -lock=false")) :wk "plan (no lock)"))
 
+(my/local-leader
+  :keymaps '(markdown-mode-map gfm-mode-map)
+  "l" '(markdown-live-preview-mode :wk "live preview")
+  "p" '(markdown-preview :wk "preview in browser")
+  "e" '(markdown-export :wk "export html")
+  "v" '(markdown-export-and-preview :wk "export + open")
+  "o" '(markdown-open :wk "open in browser")
+  "t" '(markdown-toc :wk "table of contents")
+  "i" '(markdown-insert-link :wk "insert link")
+  "c" '(markdown-insert-gfm-code-block :wk "code block"))
+
 ;; Small helpers the map refers to.
 (defun my/find-in-emacs-dir ()
   (interactive)

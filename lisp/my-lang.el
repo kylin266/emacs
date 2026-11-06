@@ -46,6 +46,8 @@
   :mode (("README\\.md\\'" . gfm-mode) ("\\.md\\'" . markdown-mode))
   :custom (markdown-fontify-code-blocks-natively t) (markdown-command "pandoc"))
 
+(use-package markdown-toc :after markdown-mode :commands markdown-toc)
+
 (use-package nginx-mode :mode ("nginx.*\\.conf\\'" "/nginx/.*\\.conf\\'" "/sites-\\(available\\|enabled\\)/"))
 (use-package ssh-config-mode :mode ("/\\.ssh/config\\'" "/sshd?_config\\'" "known_hosts\\'" "authorized_keys\\'"))
 (use-package systemd :mode ("\\.service\\'" "\\.timer\\'" "\\.socket\\'" "\\.target\\'"))

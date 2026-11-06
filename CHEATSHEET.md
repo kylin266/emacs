@@ -123,6 +123,7 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 
 ## Toggles and help
 
+- Markdown: `, l` live preview, `, p` preview in browser, `, e` export HTML, `, t` table of contents.
 - `SPC t l` line numbers, `SPC t w` wrap, `SPC t z` fullscreen, `SPC t t` pick a theme, `SPC t r` read-only.
 - `s-=` / `s--` zoom text, `s-0` reset. `s-s` save, `s-w` close buffer, `s-b` buffers.
 - `SPC h k` what does this key do, `SPC h f` function, `SPC h v` variable, `SPC h m` this mode's keys, `SPC h b` all bindings here.
