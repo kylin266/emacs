@@ -118,6 +118,7 @@
   "tl" 'display-line-numbers-mode "tw" 'visual-line-mode "tW" 'toggle-truncate-lines
   "tt" 'consult-theme "tf" 'flymake-mode "th" 'hl-line-mode
   "ts" 'flyspell-mode "tz" 'toggle-frame-fullscreen "tr" 'read-only-mode
+  "tk" '(my/toggle-kube-modeline :wk "kube ctx in modeline")
 
   "q"  '(:ignore t :wk "quit")
   "qq" 'save-buffers-kill-terminal "qr" 'restart-emacs "qf" 'delete-frame

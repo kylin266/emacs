@@ -13,3 +13,6 @@
 ;;     :models '(claude-sonnet-5-5)))
 
 ;; (setq my/font-height 150)
+
+;; Hide the kube context in the modeline inside workspaces that have no Kubernetes.
+;; (setq my/modeline-kube-hide-regexp "/Documents/<client>/")

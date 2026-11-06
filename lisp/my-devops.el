@@ -57,8 +57,21 @@
   (force-mode-line-update t)
   (message "AWS_PROFILE=%s" profile))
 
+(defvar my/modeline-show-kube t "Show the kubectl context in the modeline (toggle with SPC t k).")
+(defvar my/modeline-kube-hide-regexp nil
+  "Regexp matched against `default-directory'; where it matches, the kube context is hidden
+(set in lisp/local.el for workspaces that have no Kubernetes).")
+(defun my/kube-relevant-p ()
+  (and my/modeline-show-kube
+       (not (and my/modeline-kube-hide-regexp
+                 (string-match-p my/modeline-kube-hide-regexp (expand-file-name default-directory))))))
+(defun my/toggle-kube-modeline ()
+  (interactive)
+  (setq my/modeline-show-kube (not my/modeline-show-kube))
+  (force-mode-line-update t)
+  (message "kube context in modeline: %s" (if my/modeline-show-kube "on" "off")))
 (defun my/devops-modeline ()
-  (let ((aws (getenv "AWS_PROFILE")) (k8s my/kube-context-cache))
+  (let ((aws (getenv "AWS_PROFILE")) (k8s (and (my/kube-relevant-p) my/kube-context-cache)))
     (concat (when aws (format " ☁ %s" aws)) (when k8s (format " ⎈ %s" k8s)))))
 (add-to-list 'global-mode-string '(:eval (my/devops-modeline)) t)
 (add-hook 'emacs-startup-hook #'my/kube-current-context)
