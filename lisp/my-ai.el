@@ -11,10 +11,9 @@
 
 (use-package claude-code
   :vc (:url "https://github.com/stevemolitor/claude-code.el" :rev :newest)
-  :after eat
   :commands (claude-code claude-code-toggle claude-code-send-command claude-code-send-region claude-code-fix-error-at-point)
   :custom
-  (claude-code-terminal-backend 'eat)
+  (claude-code-terminal-backend (if (require 'vterm nil t) 'vterm 'eat))
   (claude-code-program (expand-file-name "bin/claude" user-emacs-directory))
   :config
   (claude-code-mode 1))

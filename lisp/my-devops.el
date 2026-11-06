@@ -117,6 +117,32 @@
         eshell-destroy-buffer-when-process-dies t
         eshell-visual-commands '("htop" "k9s" "less" "top" "vim" "watch" "ssh" "tmux" "aws" "docker" "kubectl")))
 
+;; vterm: real terminal emulation (libvterm), used for Claude Code and `SPC o t'.
+;; First install builds the module: M-x vterm-module-compile. On this Mac the
+;; brew toolchain is Intel under Rosetta, so the build must target arm64.
+(use-package vterm
+  :commands (vterm vterm-other-window)
+  :custom
+  (vterm-max-scrollback 20000)
+  (vterm-kill-buffer-on-exit t)
+  (vterm-always-compile-module nil)
+  (vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=no -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Release")
+  :config
+  (define-key vterm-mode-map (kbd "s-o") #'other-window)
+  (define-key vterm-mode-map (kbd "s-v") #'vterm-yank)
+  (define-key vterm-mode-map (kbd "C-c C-e") #'vterm-copy-mode))
+(with-eval-after-load 'evil (evil-set-initial-state 'vterm-mode 'emacs))
+
+(defun my/terminal ()
+  "Open vterm when its module is available, otherwise eat."
+  (interactive)
+  (if (require 'vterm nil t) (call-interactively #'vterm) (call-interactively #'eat)))
+(defun my/terminal-project ()
+  "Terminal at the project root."
+  (interactive)
+  (let ((default-directory (or (and (project-current) (project-root (project-current))) default-directory)))
+    (my/terminal)))
+
 ;;;; HTTP checks
 (use-package verb :after org :config (define-key org-mode-map (kbd "C-c C-r") verb-command-map))
 

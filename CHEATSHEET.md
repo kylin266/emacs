@@ -106,7 +106,8 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 - `SPC o s` ssh into a host from `~/.ssh/config` (terminal). `SPC o S` browse a host's files (dired over TRAMP).
 - Open any remote file: `SPC f f` then `/ssh:host:/etc/nginx/nginx.conf`. Sudo on remote: `/ssh:host|sudo::/etc/...`.
 - `SPC o t` terminal here, `SPC p t` terminal at project root, `SPC o e` eshell.
-- In the terminal (eat) keys go to the shell. `C-c C-e` switch to Emacs keys (copy text, scroll), `C-c C-j` back to the shell, `s-o` (Command-o) or `C-x o` jumps to another pane.
+- `SPC o t` terminal (vterm, same as Ghostty: colours, mouse, Shift+Tab), `SPC o T` at the project root.
+- In the terminal keys go to the shell. `C-c C-e` copy mode (select with `v`, `y` copies, `q` back), `s-v` paste, `s-o` or `C-x o` jump to another pane. `C-c C-t` in vterm also toggles copy mode.
 
 ## AI, when you want it
 

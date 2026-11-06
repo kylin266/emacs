@@ -36,7 +36,7 @@
   "p"  '(:ignore t :wk "project")
   "pp" 'project-switch-project "pf" 'project-find-file "pd" 'project-find-dir
   "pb" 'consult-project-buffer "ps" 'consult-ripgrep "pc" 'project-compile
-  "pt" 'eat-project "pe" 'project-eshell "pk" 'project-kill-buffers
+  "pt" 'my/terminal-project "pe" 'project-eshell "pk" 'project-kill-buffers
   "pD" 'project-dired "pm" 'magit-project-status
 
   "s"  '(:ignore t :wk "search")
@@ -62,8 +62,8 @@
   "oK" '(my/kube-use-context :wk "kube context")
   "oa" '(my/aws-use-profile :wk "aws profile")
   "od" '(docker :wk "docker")
-  "ot" '(eat :wk "terminal")
-  "oT" '(eat-other-window :wk "terminal (other win)")
+  "ot" '(my/terminal :wk "terminal")
+  "oT" '(my/terminal-project :wk "terminal (project)")
   "oe" '(eshell :wk "eshell")
   "os" '(my/ssh-shell :wk "ssh host")
   "oS" '(my/ssh-dired :wk "ssh dired")
