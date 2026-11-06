@@ -80,6 +80,21 @@ Add client workspaces from lisp/local.el, never here.")
   (interactive)
   (org-babel-remove-result-one-or-many t))
 
+(defun my/playbook-kill-session ()
+  "Kill the background shell a playbook runs in (stops a runaway block)."
+  (interactive)
+  (let* ((info (org-babel-get-src-block-info t))
+         (session (and info (cdr (assq :session (nth 2 info)))))
+         (killed 0))
+    (dolist (b (buffer-list))
+      (when (and (string-match-p "playbook" (buffer-name b))
+                 (or (null session) (string= session "none") (string= (buffer-name b) session))
+                 (get-buffer-process b))
+        (delete-process (get-buffer-process b))
+        (kill-buffer b)
+        (setq killed (1+ killed))))
+    (message "killed %d playbook session(s); the next block starts a fresh one" killed)))
+
 (defun my/playbook-new (name &optional dir)
   "Create a playbook NAME from the template in DIR (default: first playbook dir)."
   (interactive
@@ -110,7 +125,8 @@ Add client workspaces from lisp/local.el, never here.")
   (define-key org-mode-map (kbd "C-c p a") #'my/playbook-run-all)
   (define-key org-mode-map (kbd "C-c p s") #'my/playbook-run-subtree)
   (define-key org-mode-map (kbd "C-c p c") #'my/playbook-clear-results)
-  (define-key org-mode-map (kbd "C-c p y") #'my/playbook-copy-block))
+  (define-key org-mode-map (kbd "C-c p y") #'my/playbook-copy-block)
+  (define-key org-mode-map (kbd "C-c p k") #'my/playbook-kill-session))
 
 (provide 'my-playbooks)
 ;;; my-playbooks.el ends here

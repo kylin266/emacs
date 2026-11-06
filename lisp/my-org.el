@@ -44,7 +44,6 @@
   :hook (org-mode . org-modern-mode)
   :custom (org-modern-table nil) (org-modern-block-fringe nil))
 
-(use-package ob-async :after org)
 
 (provide 'my-org)
 ;;; my-org.el ends here

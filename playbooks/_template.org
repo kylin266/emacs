@@ -1,6 +1,6 @@
 #+TITLE: {{name}}
 #+DATE: {{date}}
-#+PROPERTY: header-args:sh :results output verbatim :exports both :eval yes
+#+PROPERTY: header-args:bash :results output verbatim :exports both :eval yes :noweb yes :session *playbook* :async yes
 #+STARTUP: showall
 
 Purpose: one line on what this playbook checks and when to run it.
@@ -9,13 +9,13 @@ Run a block with =, e= (or =C-c C-c=), the whole file with =, a=, clear with =, 
 * Context
 Set the identities every block below uses. Edit here, nowhere else.
 #+NAME: ctx
-#+begin_src sh
+#+begin_src bash
 echo "AWS_PROFILE=${AWS_PROFILE:-unset}  KUBE=$(kubectl config current-context 2>/dev/null || echo none)"
 #+end_src
 
 * Checks
 ** Example check
-#+begin_src sh
+#+begin_src bash
 date
 #+end_src
 
