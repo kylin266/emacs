@@ -184,6 +184,34 @@ cannot change state: `evil-state' is let-bound while they run)."
 ;;;; HTTP checks
 (use-package verb :after org :config (define-key org-mode-map (kbd "C-c C-r") verb-command-map))
 
+;;;; Tree sidebar
+(use-package treemacs
+  :commands (treemacs treemacs-select-window treemacs-add-and-display-current-project-exclusively treemacs-find-file)
+  :custom
+  (treemacs-width 36)
+  (treemacs-follow-after-init t)
+  (treemacs-is-never-other-window t)
+  (treemacs-sorting 'alphabetic-asc)
+  (treemacs-file-event-delay 1000)
+  (treemacs-show-hidden-files t)
+  :config
+  (treemacs-follow-mode 1)
+  (treemacs-filewatch-mode 1)
+  (treemacs-git-mode 'deferred)
+  (treemacs-project-follow-mode 1))
+(use-package treemacs-evil :after (treemacs evil) :demand t)
+(use-package treemacs-nerd-icons :after treemacs :demand t :config (treemacs-load-theme "nerd-icons"))
+(use-package treemacs-magit :after (treemacs magit))
+
+(defun my/treemacs-toggle ()
+  "Show the tree for the current project (or folder), or hide it."
+  (interactive)
+  (pcase (treemacs-current-visibility)
+    ('visible (delete-window (treemacs-get-local-window)))
+    (_ (if (project-current)
+           (treemacs-add-and-display-current-project-exclusively)
+         (treemacs)))))
+
 ;;;; Project
 (setq project-vc-extra-root-markers '("Chart.yaml" "kustomization.yaml" "main.tf" "ansible.cfg" "pyproject.toml" "package.json" "go.mod" ".project"))
 (setq project-switch-commands

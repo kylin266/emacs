@@ -46,6 +46,13 @@ Add client workspaces from lisp/local.el, never here.")
     (and f (seq-some (lambda (d) (string-prefix-p (expand-file-name d) (expand-file-name f)))
                      my/playbook-dirs))))
 
+(defun my/playbook-ingest-libs ()
+  "Make named blocks from `_*.org' files in this playbook's folder available to <<noweb>> references."
+  (when (my/playbook-in-playbook-dir-p)
+    (dolist (lib (directory-files (file-name-directory buffer-file-name) t "\\`_.*\\.org\\'"))
+      (org-babel-lob-ingest lib))))
+(add-hook 'org-mode-hook #'my/playbook-ingest-libs)
+
 (defun my/playbook-confirm (lang _body)
   "Ask before evaluating unless this is a shell block inside a playbook."
   (not (and (member lang '("sh" "shell" "bash"))

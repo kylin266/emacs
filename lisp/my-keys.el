@@ -21,7 +21,7 @@
   "f"  '(:ignore t :wk "file")
   "ff" 'find-file "fF" 'find-file-other-window
   "fr" 'consult-recent-file "fs" 'save-buffer "fS" 'write-file
-  "fd" 'dired-jump "fD" 'my/delete-this-file
+  "fd" 'dired-jump "fD" 'my/delete-this-file "ft" 'my/treemacs-toggle
   "fR" 'my/rename-this-file "fy" 'my/copy-file-path
   "fp" '(my/find-in-emacs-dir :wk "emacs config")
   "fe" '((lambda () (interactive) (find-file (expand-file-name "init.el" user-emacs-directory))) :wk "init.el")
@@ -72,6 +72,8 @@
   "og" '(gptel :wk "gptel chat")
   "oG" '(gptel-menu :wk "gptel menu")
   "o-" '(dired-jump :wk "dired here")
+  "on" '(my/treemacs-toggle :wk "tree sidebar")
+  "oN" '(treemacs-select-window :wk "focus tree")
   "of" '(make-frame :wk "new frame")
 
   "k"  '(:ignore t :wk "kubectl (buffer)")
