@@ -62,7 +62,17 @@
 (global-hl-line-mode 1)
 (show-paren-mode 1)
 (window-divider-mode 1)
-(pixel-scroll-precision-mode 1)
+;; Trackpad: plain line-based wheel scrolling. pixel-scroll-precision-mode
+;; stutters on the macOS build, so it stays off.
+(pixel-scroll-precision-mode 0)
+(setq mouse-wheel-scroll-amount '(2 ((shift) . 8) ((control) . nil))
+      mouse-wheel-progressive-speed nil
+      mouse-wheel-follow-mouse t
+      scroll-step 1
+      scroll-preserve-screen-position t
+      auto-window-vscroll nil
+      fast-but-imprecise-scrolling t
+      jit-lock-defer-time 0)
 (blink-cursor-mode 0)
 
 ;; Trailing whitespace visible in code, cleaned on save for files I own.
