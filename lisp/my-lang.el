@@ -44,7 +44,10 @@
 
 (use-package markdown-mode
   :mode (("README\\.md\\'" . gfm-mode) ("\\.md\\'" . markdown-mode))
-  :custom (markdown-fontify-code-blocks-natively t) (markdown-command "pandoc"))
+  :custom
+  (markdown-fontify-code-blocks-natively t)
+  (markdown-command "pandoc")
+  (markdown-split-window-direction 'horizontal))
 
 (use-package markdown-toc :after markdown-mode :commands markdown-toc)
 
