@@ -1,5 +1,11 @@
 ;;; my-devops.el --- kubernetes, docker, aws, remote hosts, terminals -*- lexical-binding: t -*-
 
+;; Shells and org blocks started from Emacs must never page.
+(setenv "AWS_PAGER" "")
+(setenv "PAGER" "cat")
+(setenv "GIT_PAGER" "cat")
+(setenv "KUBECTL_PAGER" "")
+
 ;;;; Kubernetes
 (use-package kubel
   :commands kubel
