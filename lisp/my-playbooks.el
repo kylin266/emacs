@@ -46,11 +46,12 @@ Add client workspaces from lisp/local.el, never here.")
     (and f (seq-some (lambda (d) (string-prefix-p (expand-file-name d) (expand-file-name f)))
                      my/playbook-dirs))))
 
-(defun my/playbook-session-setup ()
-  "Session shells echo their input; let comint strip it so results stay clean."
-  (when (string-match-p "playbook" (buffer-name))
-    (setq-local comint-process-echoes t)))
-(add-hook 'shell-mode-hook #'my/playbook-session-setup)
+(defun my/playbook--no-pty (orig &rest args)
+  "Start babel shell sessions over a pipe, not a pty: no echoed input in
+results, and tools see no terminal so they never page."
+  (let ((process-connection-type nil)) (apply orig args)))
+(with-eval-after-load 'ob-shell
+  (advice-add 'org-babel-sh-initiate-session :around #'my/playbook--no-pty))
 
 (defun my/playbook-ingest-libs ()
   "Make named blocks from `_*.org' files in this playbook's folder available to <<noweb>> references."
