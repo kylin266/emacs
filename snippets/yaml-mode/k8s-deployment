@@ -1,0 +1,37 @@
+# -*- mode: snippet -*-
+# name: k8s Deployment
+# key: deploy
+# --
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${1:app}
+  namespace: ${2:default}
+  labels:
+    app: $1
+spec:
+  replicas: ${3:2}
+  selector:
+    matchLabels:
+      app: $1
+  template:
+    metadata:
+      labels:
+        app: $1
+    spec:
+      containers:
+        - name: $1
+          image: ${4:image:tag}
+          ports:
+            - containerPort: ${5:8080}
+          resources:
+            requests:
+              cpu: ${6:100m}
+              memory: ${7:128Mi}
+            limits:
+              memory: ${8:256Mi}
+          readinessProbe:
+            httpGet:
+              path: ${9:/healthz}
+              port: $5
+$0

@@ -1,0 +1,21 @@
+# package state and caches
+/elpa/
+/eln-cache/
+/var/
+/etc/
+/auto-save-list/
+/tramp
+/transient/
+/custom.el
+*.elc
+*~
+\#*\#
+.DS_Store
+
+# machine-local, never shared
+/lisp/local.el
+/playbooks/local/
+
+# compiled tree-sitter grammars (M-x my/install-treesit-grammars)
+/tree-sitter/
+/bin/claude-env.local

@@ -1,0 +1,15 @@
+;;; local.el --- machine-local settings, NOT committed -*- lexical-binding: t -*-
+;; Copy to lisp/local.el and edit.  Loaded last from init.el.
+
+;; Extra playbook folders (client folders that must stay off GitHub).
+;; (add-to-list 'my/playbook-dirs (expand-file-name "~/Documents/<client>/playbooks"))
+
+;; A LiteLLM / OpenAI-compatible gateway for client work (key in ~/.authinfo.gpg,
+;; `machine litellm.example.com login apikey password ...').
+;; (with-eval-after-load 'gptel
+;;   (gptel-make-openai "LiteLLM"
+;;     :host "litellm.example.com" :endpoint "/v1/chat/completions" :stream t
+;;     :key #'gptel-api-key-from-auth-source
+;;     :models '(claude-sonnet-5-5)))
+
+;; (setq my/font-height 150)

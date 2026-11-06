@@ -1,0 +1,28 @@
+# -*- mode: snippet -*-
+# name: k8s Ingress
+# key: ing
+# --
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${1:app}
+  namespace: ${2:default}
+  annotations:
+    cert-manager.io/cluster-issuer: ${3:letsencrypt-prod}
+spec:
+  ingressClassName: ${4:nginx}
+  tls:
+    - hosts: [${5:host.example.com}]
+      secretName: $1-tls
+  rules:
+    - host: $5
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: $1
+                port:
+                  number: ${6:80}
+$0

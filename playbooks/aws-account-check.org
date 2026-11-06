@@ -1,0 +1,70 @@
+#+TITLE: AWS account check (current AWS_PROFILE)
+#+PROPERTY: header-args:sh :results output verbatim :exports both :eval yes
+#+STARTUP: showall
+
+Read-only sweep of the account behind =AWS_PROFILE= (set it with =SPC o a=).
+Every call is a describe/list; nothing here changes state.
+
+* Identity and region
+#+begin_src sh
+aws sts get-caller-identity --output table
+echo "region: ${AWS_REGION:-$(aws configure get region)}"
+#+end_src
+
+* EC2
+** Instances
+#+begin_src sh
+aws ec2 describe-instances --query 'Reservations[].Instances[].[InstanceId,InstanceType,State.Name,PrivateIpAddress,PublicIpAddress,Tags[?Key==`Name`]|[0].Value]' --output table
+#+end_src
+** Status checks not ok
+#+begin_src sh
+aws ec2 describe-instance-status --include-all-instances --query 'InstanceStatuses[?InstanceStatus.Status!=`ok` || SystemStatus.Status!=`ok`].[InstanceId,InstanceState.Name,InstanceStatus.Status,SystemStatus.Status]' --output table
+#+end_src
+** Scheduled events
+#+begin_src sh
+aws ec2 describe-instance-status --query 'InstanceStatuses[?Events].[InstanceId,Events[0].Code,Events[0].NotBefore,Events[0].Description]' --output table
+#+end_src
+
+* Load balancers and targets
+#+begin_src sh
+aws elbv2 describe-load-balancers --query 'LoadBalancers[].[LoadBalancerName,Type,State.Code,DNSName]' --output table
+#+end_src
+** Unhealthy targets
+#+begin_src sh
+for tg in $(aws elbv2 describe-target-groups --query 'TargetGroups[].TargetGroupArn' --output text); do
+  aws elbv2 describe-target-health --target-group-arn "$tg" \
+    --query "TargetHealthDescriptions[?TargetHealth.State!='healthy'].[\`${tg##*/}\`,Target.Id,TargetHealth.State,TargetHealth.Reason]" --output text
+done
+echo "(empty above = all healthy)"
+#+end_src
+
+* RDS
+#+begin_src sh
+aws rds describe-db-instances --query 'DBInstances[].[DBInstanceIdentifier,Engine,EngineVersion,DBInstanceClass,DBInstanceStatus,MultiAZ,AllocatedStorage]' --output table
+#+end_src
+
+* CloudWatch alarms in ALARM
+#+begin_src sh
+aws cloudwatch describe-alarms --state-value ALARM --query 'MetricAlarms[].[AlarmName,StateUpdatedTimestamp,StateReason]' --output table
+#+end_src
+
+* Certificates expiring within 30 days (ACM, this region + us-east-1)
+#+begin_src sh
+for r in "${AWS_REGION:-$(aws configure get region)}" us-east-1; do
+  echo "== $r"
+  aws acm list-certificates --region "$r" --query 'CertificateSummaryList[].[DomainName,Status,NotAfter]' --output text \
+    | awk -v lim="$(date -u -v+30d +%Y-%m-%d)" '$3 != "None" && substr($3,1,10) < lim'
+done
+echo "(empty = nothing expiring)"
+#+end_src
+
+* Cost (month to date, by service)
+#+begin_src sh
+aws ce get-cost-and-usage --time-period Start=$(date -u +%Y-%m-01),End=$(date -u +%Y-%m-%d) --granularity MONTHLY --metrics UnblendedCost --group-by Type=DIMENSION,Key=SERVICE \
+  --query 'ResultsByTime[0].Groups[].[Keys[0],Metrics.UnblendedCost.Amount]' --output text | sort -k2 -rn | head -15
+#+end_src
+
+* S3 buckets
+#+begin_src sh
+aws s3 ls
+#+end_src

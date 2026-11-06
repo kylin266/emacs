@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: GitLab CI job
+# key: job
+# --
+${1:job-name}:
+  stage: ${2:build}
+  image: ${3:alpine:3}
+  script:
+    - ${4:echo run}
+  rules:
+    - if: \$CI_COMMIT_BRANCH == "${5:main}"
+$0

@@ -1,0 +1,25 @@
+# -*- mode: snippet -*-
+# name: k8s CronJob
+# key: cron
+# --
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ${1:job}
+  namespace: ${2:default}
+spec:
+  schedule: "${3:0 2 * * *}"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: $1
+              image: ${4:image:tag}
+              command: ["${5:/bin/sh}", "-c", "${6:echo hello}"]
+$0

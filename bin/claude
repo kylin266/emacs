@@ -1,0 +1,8 @@
+#!/bin/zsh
+# Claude Code launcher used by claude-code.el.
+# Drop a `claude-env.local` next to this file (git-ignored) to set env per
+# working directory, e.g. a separate CLAUDE_CONFIG_DIR for a client workspace.
+export PATH="$HOME/.local/bin:$HOME/.bun/bin:/usr/local/bin:$PATH"
+local_env="${0:A:h}/claude-env.local"
+[ -r "$local_env" ] && source "$local_env"
+exec claude "$@"

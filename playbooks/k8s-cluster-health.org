@@ -1,0 +1,71 @@
+#+TITLE: Kubernetes cluster health (current context)
+#+PROPERTY: header-args:sh :results output verbatim :exports both :eval yes
+#+STARTUP: showall
+
+Five-minute read of whichever cluster =kubectl= points at. Switch with =SPC o K= first.
+
+* Context
+#+begin_src sh
+kubectl config current-context
+kubectl version 2>/dev/null | sed -n 's/^\(Client\|Server\) Version: /\1 /p'
+#+end_src
+
+* Nodes
+#+begin_src sh
+kubectl get nodes -o wide
+echo; kubectl top nodes 2>/dev/null || echo "metrics-server not available"
+#+end_src
+
+** Node conditions that are not Ready
+#+begin_src sh
+kubectl get nodes -o json | jq -r '.items[] | .metadata.name as $n | .status.conditions[] | select((.type=="Ready" and .status!="True") or (.type!="Ready" and .status=="True")) | "\($n)\t\(.type)=\(.status)\t\(.message)"'
+#+end_src
+
+* Workloads
+** Pods not Running / Succeeded
+#+begin_src sh
+kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded -o wide
+#+end_src
+
+** Containers restarting (> 3)
+#+begin_src sh
+kubectl get pods -A -o json | jq -r '.items[] | .metadata.namespace as $ns | .metadata.name as $p | .status.containerStatuses[]? | select(.restartCount>3) | "\($ns)\t\($p)\t\(.name)\trestarts=\(.restartCount)\t\(.lastState.terminated.reason // "")"' | sort -t$'\t' -k4 -r | head -30
+#+end_src
+
+** Deployments / StatefulSets not fully available
+#+begin_src sh
+kubectl get deploy -A -o json | jq -r '.items[] | select(.status.replicas != .status.availableReplicas) | "deploy\t\(.metadata.namespace)\t\(.metadata.name)\t\(.status.availableReplicas // 0)/\(.spec.replicas)"'
+kubectl get sts -A -o json | jq -r '.items[] | select(.status.replicas != .status.readyReplicas) | "sts\t\(.metadata.namespace)\t\(.metadata.name)\t\(.status.readyReplicas // 0)/\(.spec.replicas)"'
+#+end_src
+
+** Top pods by memory
+#+begin_src sh
+kubectl top pods -A --sort-by=memory 2>/dev/null | head -25
+#+end_src
+
+* Events (Warning, last hour)
+#+begin_src sh
+kubectl get events -A --field-selector type=Warning --sort-by=.lastTimestamp | tail -40
+#+end_src
+
+* Storage
+#+begin_src sh
+kubectl get pvc -A | grep -v Bound || echo "all PVCs Bound"
+echo; kubectl get pv | grep -vE 'Bound|Available' || echo "all PVs Bound/Available"
+#+end_src
+
+* Ingress & certificates
+#+begin_src sh
+kubectl get ingress -A 2>/dev/null | head -40
+echo; kubectl get certificate -A 2>/dev/null | grep -v True || echo "cert-manager: all Ready (or not installed)"
+#+end_src
+
+* Jobs
+#+begin_src sh
+kubectl get jobs -A -o json | jq -r '.items[] | select(.status.failed // 0 > 0) | "\(.metadata.namespace)\t\(.metadata.name)\tfailed=\(.status.failed)"'
+kubectl get cronjobs -A | head -30
+#+end_src
+
+* Notes
+- A node NotReady with pods still Running usually means kubelet or the CNI, not the workload.
+- Restarts with reason OOMKilled: raise the limit or fix the leak, do not just restart.

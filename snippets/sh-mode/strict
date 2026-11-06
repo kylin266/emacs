@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: bash strict header
+# key: strict
+# --
+#!/usr/bin/env bash
+set -Eeuo pipefail
+IFS=\$'\n\t'
+SCRIPT_DIR="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
+$0

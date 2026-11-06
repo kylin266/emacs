@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: yaml-language-server schema comment
+# key: schema
+# --
+# yaml-language-server: \$schema=${1:https://json.schemastore.org/$2.json}
+$0
