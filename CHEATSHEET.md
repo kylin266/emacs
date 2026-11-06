@@ -121,6 +121,13 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 - `, t` cycle TODO state. `M-RET` new heading, `M-h/l` promote / demote, `M-j/k` move heading.
 - `C-c C-l` insert link, `RET` follows a link. `<sh TAB` inserts a shell block, `<y TAB` YAML, `<tf TAB` Terraform.
 
+## Daemon and client
+
+- `ec` new frame, `ec file` open in the current frame, `ec -t file` in the terminal, `ec -w file` wait (EDITOR).
+- Closing the last frame (`SPC q q` in a client frame) keeps the daemon; next `ec` is instant.
+- Restart the daemon after config changes: `launchctl kickstart -k gui/$(id -u)/org.gnu.emacs.daemon`.
+- Logs: `~/Library/Logs/emacs-daemon.log`. Never launch Emacs from the Dock while the daemon runs.
+
 ## Toggles and help
 
 - Markdown: `, l` live preview, `, p` preview in browser, `, e` export HTML, `, t` table of contents.

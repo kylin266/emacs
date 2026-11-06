@@ -1,0 +1,18 @@
+#!/bin/sh
+# Emacs client: opens FILE(s) in the running daemon, or a new frame when none given.
+# -t  terminal frame (for ssh / tmux);  -w  wait (for git commit / EDITOR).
+EC=/Applications/Emacs.app/Contents/MacOS/bin/emacsclient
+[ -x "$EC" ] || EC=emacsclient
+case "$1" in
+  -t) shift; exec "$EC" -t -a '' "$@" ;;
+  -w) shift; exec "$EC" -c -a '' "$@" ;;
+esac
+if [ $# -eq 0 ]; then
+  exec "$EC" -n -c -a ''
+fi
+# reuse an existing GUI frame if there is one, else make one
+if "$EC" -e '(and (cl-some (lambda (f) (frame-parameter f (quote window-system))) (frame-list)) t)' 2>/dev/null | grep -q t; then
+  exec "$EC" -n -a '' "$@" -e '(select-frame-set-input-focus (selected-frame))' 2>/dev/null || exec "$EC" -n -a '' "$@"
+else
+  exec "$EC" -n -c -a '' "$@"
+fi

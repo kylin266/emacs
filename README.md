@@ -25,6 +25,23 @@ Rosetta, and a formula build links against Homebrew's libraries, which is how
 the previous install broke (`libxml2.2.dylib` missing after an upgrade). The
 cask is a self-contained universal binary; Emacs runs native arm64.
 
+## Daemon
+
+`launchd/org.gnu.emacs.daemon.plist` runs `Emacs --fg-daemon` at login and restarts it
+if it dies (log in `~/Library/Logs/emacs-daemon.log`). Install it with:
+
+```sh
+cp launchd/org.gnu.emacs.daemon.plist ~/Library/LaunchAgents/
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/org.gnu.emacs.daemon.plist
+ln -sf ~/.emacs.d/bin/ec /usr/local/bin/ec
+```
+
+Then `ec` opens a frame on the daemon, `ec file.yaml` opens the file in the existing frame,
+`ec -t file` opens a terminal frame (ssh, tmux), `ec -w file` waits until the buffer is
+closed (use it as `EDITOR`). Closing the last frame leaves the daemon running, so the
+next `ec` is instant. Restart the daemon with `launchctl kickstart -k gui/$(id -u)/org.gnu.emacs.daemon`.
+Do not start Emacs from the Dock while the daemon runs; that launches a second, separate Emacs.
+
 ## Layout
 
 - `early-init.el`, `init.el` load `lisp/my-*.el` in order.
