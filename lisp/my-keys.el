@@ -154,6 +154,11 @@
   "i" '(markdown-insert-link :wk "insert link")
   "c" '(markdown-insert-gfm-code-block :wk "code block"))
 
+(my/local-leader
+  :keymaps '(html-mode-map html-ts-mode-map mhtml-mode-map)
+  "p" '(browse-url-of-buffer :wk "open in browser")
+  "e" '((lambda () (interactive) (eww-open-file buffer-file-name)) :wk "render in eww"))
+
 ;; Small helpers the map refers to.
 (defun my/find-in-emacs-dir ()
   (interactive)

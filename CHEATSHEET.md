@@ -130,6 +130,7 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 
 ## Toggles and help
 
+- HTML file: `, p` open in browser, `, e` render in eww. Any HTML: `M-x eww-open-file`.
 - Markdown: `, l` live preview, `, p` preview in browser, `, e` export HTML, `, t` table of contents.
 - `SPC t l` line numbers, `SPC t w` wrap, `SPC t z` fullscreen, `SPC t t` pick a theme, `SPC t r` read-only.
 - `s-=` / `s--` zoom text, `s-0` reset. `s-s` save, `s-w` close buffer, `s-b` buffers.
