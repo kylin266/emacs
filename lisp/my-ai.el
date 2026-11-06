@@ -12,6 +12,8 @@
 ;;    ~/.authinfo.gpg: `machine api.anthropic.com login apikey password sk-...'.
 ;;    A LiteLLM backend for client work can be added in lisp/local.el.
 
+(use-package web-server :pin melpa)   ; GNU ELPA's 0.1.2 lacks ws-process
+
 (use-package claude-code-ide
   :vc (:url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
   :commands (claude-code-ide claude-code-ide-toggle claude-code-ide-menu

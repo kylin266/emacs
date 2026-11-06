@@ -1,7 +1,7 @@
 ;;; my-ui.el --- look and feel -*- lexical-binding: t -*-
 
 (defvar my/font-family "JetBrainsMono Nerd Font")
-(defvar my/font-height 140)
+(defvar my/font-height 130)
 
 (defun my/apply-font (&optional frame)
   (when (and (display-graphic-p frame)
