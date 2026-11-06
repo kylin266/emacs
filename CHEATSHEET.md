@@ -106,11 +106,12 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 - `SPC o s` ssh into a host from `~/.ssh/config` (terminal). `SPC o S` browse a host's files (dired over TRAMP).
 - Open any remote file: `SPC f f` then `/ssh:host:/etc/nginx/nginx.conf`. Sudo on remote: `/ssh:host|sudo::/etc/...`.
 - `SPC o t` terminal here, `SPC p t` terminal at project root, `SPC o e` eshell.
-- In the terminal: it is a normal shell; `C-c C-k` to get back to Emacs keys if it swallows them, `C-c C-j` back to the shell.
+- In the terminal (eat) keys go to the shell. `C-c C-e` switch to Emacs keys (copy text, scroll), `C-c C-j` back to the shell, `C-c o` jump to another pane, `C-x o` also works.
 
 ## AI, when you want it
 
-- `SPC o c` toggle Claude Code beside the code. `SPC a s` send a prompt about the current file. `SPC a r` send the selection.
+- `SPC o c` toggle Claude Code beside the code (project root, same login as the terminal; Shift+Tab cycles permission mode, `ESC` interrupts).
+- `SPC a s` send a prompt with the current file and line as context. Select with `v` then `SPC a r` sends the region.
 - `SPC a f` ask Claude Code to fix the error under cursor. `SPC a k` kill the session.
 - Inside a client workspace Claude Code runs with its own config dir (`bin/claude-env.local`), as in the shell.
 - `SPC o g` gptel chat buffer (needs a key in `~/.authinfo.gpg`), `SPC a R` rewrite the selection, `SPC a m` the gptel menu.
