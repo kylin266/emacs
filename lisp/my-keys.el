@@ -196,6 +196,7 @@
 (global-set-key (kbd "s-F") #'consult-ripgrep)
 (global-set-key (kbd "s-b") #'consult-buffer)
 (global-set-key (kbd "s-`") #'other-frame)
+(global-set-key (kbd "s-o") #'other-window)   ; works inside terminal panes too
 (global-set-key (kbd "<escape>") #'keyboard-escape-quit)
 
 (provide 'my-keys)

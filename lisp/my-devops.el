@@ -102,9 +102,9 @@
   :custom (eat-kill-buffer-on-exit t) (eat-enable-mouse t)
   :hook (eshell-load . eat-eshell-mode)
   :config
-  ;; C-c o leaves the terminal pane even while keys go to the shell.
-  (define-key eat-semi-char-mode-map (kbd "C-c o") #'other-window)
-  (define-key eat-char-mode-map (kbd "C-c o") #'other-window))
+  ;; eat owns C-c, so leaving the pane while keys go to the shell is s-o
+  ;; (Command-o), bound globally in my-keys.el; C-x o also works.
+  )
 
 (use-package eshell
   :ensure nil
