@@ -128,10 +128,15 @@
   (vterm-always-compile-module nil)
   (vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=no -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Release")
   :config
+  ;; Terminal buffers stay in Emacs state so every key, ESC included, reaches
+  ;; the program (Claude Code uses ESC to interrupt). C-z toggles vim keys
+  ;; back on for scrolling; C-c C-e is copy mode.
+  (add-hook 'vterm-mode-hook #'evil-emacs-state)
+  (define-key vterm-mode-map (kbd "<escape>") #'vterm-send-escape)
+  (define-key vterm-mode-map (kbd "ESC") #'vterm-send-escape)
   (define-key vterm-mode-map (kbd "s-o") #'other-window)
   (define-key vterm-mode-map (kbd "s-v") #'vterm-yank)
   (define-key vterm-mode-map (kbd "C-c C-e") #'vterm-copy-mode))
-(with-eval-after-load 'evil (evil-set-initial-state 'vterm-mode 'emacs))
 
 (defun my/terminal ()
   "Open vterm when its module is available, otherwise eat."

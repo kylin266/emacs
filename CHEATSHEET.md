@@ -112,6 +112,7 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 ## AI, when you want it
 
 - `SPC o c` toggle Claude Code beside the code (project root, same login as the terminal; Shift+Tab cycles permission mode, `ESC` interrupts).
+- The Claude pane has no vim modes: every key goes to Claude. To scroll or copy: `C-c C-e` (copy mode, `q` leaves). `C-z` toggles vim keys on and off if you ever need them.
 - `SPC a s` send a prompt with the current file and line as context. Select with `v` then `SPC a r` sends the region.
 - `SPC a f` ask Claude Code to fix the error under cursor. `SPC a k` kill the session.
 - Inside a client workspace Claude Code runs with its own config dir (`bin/claude-env.local`), as in the shell.
