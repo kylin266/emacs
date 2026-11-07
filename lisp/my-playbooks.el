@@ -24,7 +24,8 @@ Add client workspaces from lisp/local.el, never here.")
     (dolist (dir my/playbook-dirs)
       (when (file-directory-p dir)
         (dolist (f (directory-files-recursively dir "\\.org\\'"))
-          (unless (string-prefix-p "_" (file-name-nondirectory f))
+          (unless (or (string-prefix-p "_" (file-name-nondirectory f))
+                      (string-match-p "/runs/" f))   ; reports are not playbooks
             (push f files)))))
     (sort files #'string<)))
 
