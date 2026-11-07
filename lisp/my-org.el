@@ -22,7 +22,7 @@
   :config
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((shell . t) (emacs-lisp . t) (python . t) (sql . t) (js . t)))
+   '((shell . t) (emacs-lisp . t) (python . t) (sql . t) (js . t) (dot . t) (gnuplot . t)))
   (add-to-list 'org-src-lang-modes '("sh" . sh))
   (add-to-list 'org-src-lang-modes '("yaml" . yaml))
   (add-to-list 'org-src-lang-modes '("hcl" . terraform))
@@ -31,7 +31,14 @@
   (add-to-list 'org-structure-template-alist '("sh" . "src sh"))
   (add-to-list 'org-structure-template-alist '("y" . "src yaml"))
   (add-to-list 'org-structure-template-alist '("tf" . "src hcl"))
-  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp")))
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  ;; Diagrams and charts produced by blocks show up inline right after they run.
+  (setq org-startup-with-inline-images t
+        org-image-actual-width '(900))
+  (add-hook 'org-babel-after-execute-hook #'org-display-inline-images))
+
+(use-package gnuplot :commands (gnuplot-mode gnuplot-send-buffer-to-gnuplot))
+(use-package graphviz-dot-mode :mode ("\\.dot\\'" "\\.gv\\'") :custom (graphviz-dot-indent-width 2))
 
 (use-package evil-org
   :after (evil org)

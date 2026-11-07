@@ -1,0 +1,6 @@
+#!/bin/sh
+# Graphviz `dot` stand-in: real Graphviz compiled to WebAssembly (viz.js), run by node.
+# Same flags as dot for -T, -K, -o. Used because Homebrew cannot build graphviz on this Mac.
+node_bin=$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1)
+export PATH="${node_bin:+$node_bin:}/usr/local/bin:$PATH"
+exec node "$HOME/.local/lib/dot2svg/dot2svg.mjs" "$@"

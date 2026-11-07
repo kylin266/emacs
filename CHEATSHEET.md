@@ -67,6 +67,7 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 - `, e` or `C-c C-c` run the block under cursor. `, a` run the whole file (asks). `, s` run this heading.
 - `, c` clear all results. `, y` copy the block's command. `, n` / `, p` next / previous block. `, k` kill a run that is taking too long. `, r` gather all results into a report page on the right (findings first, passed list below).
 - Blocks run in the background: Emacs stays usable, the result appears under the block when it finishes.
+- Blocks that produce an `.svg` (diagrams, charts) show the image inline under the block. `RET` on the link opens the file, `, p` there opens it in the browser at full size. `C-c C-x C-v` toggles inline images.
 - `, '` edit the block in its own shell buffer (`C-c C-c` to come back).
 - `TAB` fold / unfold a heading. `S-TAB` cycle the whole file.
 - Set the identities once at the top of the file: `#+PROPERTY: header-args:sh :var P1="profile"`.

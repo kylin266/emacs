@@ -38,7 +38,7 @@
       (add-to-list 'exec-path d)
       (setenv "PATH" (concat d path-separator (getenv "PATH"))))))
 
-(dolist (d (list "/usr/local/bin" "~/go/bin" "~/.bun/bin" "~/.local/bin"
+(dolist (d (list (expand-file-name "bin" user-emacs-directory) "/usr/local/bin" "~/go/bin" "~/.bun/bin" "~/.local/bin"
                  (car (last (file-expand-wildcards "~/.nvm/versions/node/*/bin")))))
   (when d (my/add-to-path d)))
 
