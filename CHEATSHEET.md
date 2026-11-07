@@ -46,7 +46,8 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 - `` SPC ` `` last buffer. `SPC x` scratch buffer (org).
 - `SPC w v` split right, `SPC w s` split below, `SPC w d` close window, `SPC w m` maximise.
 - `SPC w h j k l` focus window, `SPC w H J K L` move the window, `SPC w =` balance.
-- `SPC w u` undo window layout change.
+- `SPC w u` undo window layout change. `SPC w p` pin the window so nothing replaces its buffer (again to unpin).
+- `SPC h c` opens this cheat sheet pinned on the right; `SPC h c` again closes it.
 - Dired: `RET` open, `-` go up, `m` mark, `d` flag delete, `x` execute, `C` copy, `R` rename, `+` new dir, `g` refresh, `s` sort name/date, `C-u s` edit ls switches (`-alht` newest, `-alhS` biggest).
 - Tree sidebar: `SPC o n` toggle (project of the current file), `SPC o N` focus it. In the tree: `j`/`k` move, `RET` or `l` open, `h` collapse, `TAB` expand, `cf`/`cd` new file/dir, `R` rename, `d` delete, `s` sort menu, `H` toggle hidden, `q` close.
 

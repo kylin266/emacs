@@ -54,6 +54,7 @@
   "wH" 'evil-window-move-far-left "wL" 'evil-window-move-far-right
   "wJ" 'evil-window-move-very-bottom "wK" 'evil-window-move-very-top
   "w=" 'balance-windows "wu" 'winner-undo "wr" 'winner-redo
+  "wp" '(my/pin-window :wk "pin/unpin window")
 
   "o"  '(:ignore t :wk "open")
   "op" '(my/playbook :wk "playbook")
@@ -113,6 +114,7 @@
   "hx" 'helpful-command "hp" 'helpful-at-point "hm" 'describe-mode
   "hi" 'info "hb" 'embark-bindings "hF" 'describe-face "ho" 'describe-symbol
   "hP" 'describe-package "hM" 'man
+  "hc" '(my/cheatsheet :wk "cheat sheet (pinned)")
 
   "t"  '(:ignore t :wk "toggle")
   "tl" 'display-line-numbers-mode "tw" 'visual-line-mode "tW" 'toggle-truncate-lines
@@ -173,6 +175,28 @@
   :keymaps '(html-mode-map html-ts-mode-map mhtml-mode-map)
   "p" '(browse-url-of-buffer :wk "open in browser")
   "e" '((lambda () (interactive) (eww-open-file buffer-file-name)) :wk "render in eww"))
+
+(defun my/pin-window ()
+  "Pin or unpin the current window: a pinned window keeps its buffer, other
+commands open their buffers elsewhere."
+  (interactive)
+  (let ((w (selected-window)))
+    (set-window-dedicated-p w (not (window-dedicated-p w)))
+    (force-mode-line-update)
+    (message "window %s" (if (window-dedicated-p w) "pinned" "unpinned"))))
+
+(defun my/cheatsheet ()
+  "Open the cheat sheet in a pinned side window on the right (toggle)."
+  (interactive)
+  (let* ((file (expand-file-name "CHEATSHEET.md" user-emacs-directory))
+         (buf (find-file-noselect file))
+         (win (get-buffer-window buf)))
+    (if win
+        (delete-window win)
+      (let ((w (display-buffer-in-side-window buf '((side . right) (window-width . 0.42) (slot . 1)))))
+        (set-window-dedicated-p w t)
+        (with-current-buffer buf (read-only-mode 1) (markdown-mode) (setq-local truncate-lines nil) (visual-line-mode 1))
+        (select-window w)))))
 
 ;; Small helpers the map refers to.
 (defun my/find-in-emacs-dir ()
