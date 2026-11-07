@@ -66,7 +66,8 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 
 - `SPC o p` open a playbook. `SPC o P` new one from the template.
 - `, e` or `C-c C-c` run the block under cursor. `, a` run the whole file (asks). `, s` run this heading.
-- `, c` clear all results. `, y` copy the block's command. `, n` / `, p` next / previous block. `, k` kill a run that is taking too long. `, r` gather all results into a report page on the right (findings first, passed list below).
+- `, c` clear all results. `, y` copy the block's command. `, n` / `, p` next / previous block. `, k` kill a run that is taking too long. `, r` gather all results into a report page on the right (summary table, findings, information, passed). `, R` the same report as a styled HTML page in the browser.
+- `, A` choose the AWS account (profile) the playbook targets; `, v` set any of its variables (group, region, domain …) with completion. Then rerun.
 - Blocks run in the background: Emacs stays usable, the result appears under the block when it finishes.
 - Blocks that produce an `.svg` (diagrams, charts) show the image inline under the block. `RET` on the link opens the file, `, p` there opens it in the browser at full size. `C-c C-x C-v` toggles inline images.
 - `, '` edit the block in its own shell buffer (`C-c C-c` to come back).

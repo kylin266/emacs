@@ -113,6 +113,27 @@ results, and tools see no terminal so they never page."
               ((stringp r) r)
               (t (format "%S" r)))))))
 
+(defun my/playbook--vars-line ()
+  "The :var part of the file's #+PROPERTY line, or nil."
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward "^#\\+PROPERTY: header-args[^\n]*:var \\(.*\\)$" nil t)
+      (match-string-no-properties 1))))
+
+(defun my/playbook--classify (body res)
+  "Classify a block from its BODY and result RES.
+A block whose body prints an \"(empty = ...)\" or \"(... )\" pass line is a check:
+pass when the result is only such lines, finding otherwise. A block without one
+is information. Return one of finding info pass running missing."
+  (let* ((lines (and res (seq-remove #'string-empty-p (mapcar #'string-trim (split-string res "\n")))))
+         (sentinel (string-match-p "echo \"(" body)))
+    (cond ((null res) 'missing)
+          ((and (= (length lines) 1) (string-match-p "\\`[0-9a-f-]\\{32,36\\}\\'" (car lines))) 'running)
+          ((null lines) (if sentinel 'pass 'info))
+          ((and sentinel (seq-every-p (lambda (l) (or (string-prefix-p "(" l) (string-prefix-p "==" l))) lines)) 'pass)
+          (sentinel 'finding)
+          (t 'info))))
+
 (defun my/playbook-report (&optional quiet)
   "Gather every block's result in this playbook into a dated report and open it beside.
 Report goes to runs/<date>-<playbook>.org next to the playbook (never committed).
@@ -122,45 +143,62 @@ With QUIET, refresh the report buffer without changing windows or focus."
   (let* ((src buffer-file-name)
          (name (file-name-base src))
          (dir (expand-file-name "runs" (file-name-directory src)))
-         (stamp (format-time-string "%Y-%m-%d-%H%M"))
          (out (expand-file-name (format "%s-%s.org" (format-time-string "%Y-%m-%d") name) dir))
-         (findings 0) (ok 0) (running 0) (missing 0) sections)
+         (vars (my/playbook--vars-line))
+         sections)
     (org-babel-map-src-blocks nil
-      (let* ((heading (string-join (append (org-get-outline-path) (list (org-get-heading t t t t))) " / "))
+      (let* ((area (or (car (org-get-outline-path)) (org-get-heading t t t t)))
+             (check (if (org-get-outline-path) (org-get-heading t t t t) ""))
              (res (my/playbook--result-text (org-babel-where-is-src-block-result)))
-             (lines (and res (seq-remove #'string-empty-p (split-string (string-trim res) "\n"))))
-             (status (cond ((null res) (cl-incf missing) 'missing)
-                           ((and (= (length lines) 1) (string-match-p "\\`[0-9a-f-]\\{32,36\\}\\'" (car lines))) (cl-incf running) 'running)
-                           ((seq-every-p (lambda (l) (or (string-prefix-p "(" l) (string-prefix-p "==" l))) lines) (cl-incf ok) 'ok)
-                           (t (cl-incf findings) 'finding))))
-        (push (list heading status res) sections)))
+             (status (my/playbook--classify body res))
+             (n (if res (length (seq-remove #'string-empty-p (split-string (string-trim res) "\n"))) 0)))
+        (push (list area check status res n) sections)))
     (setq sections (nreverse sections))
-    (make-directory dir t)
-    (with-temp-file out
-      (insert (format "#+TITLE: %s · %s\n#+STARTUP: showall\n#+OPTIONS: ^:nil\n\n" name stamp))
-      (insert (format "Findings: %d   OK: %d   still running: %d   not run: %d\n" findings ok running missing))
-      (when (getenv "AWS_PROFILE") (insert (format "AWS_PROFILE=%s  " (getenv "AWS_PROFILE"))))
-      (when (and my/kube-context-cache (my/kube-relevant-p)) (insert (format "kube=%s" my/kube-context-cache)))
-      (insert "\n\n")
-      (dolist (sec sections)
-        (pcase-let ((`(,heading ,status ,res) sec))
-          (when (eq status 'finding)
-            (insert (format "* %s\n#+begin_example\n%s\n#+end_example\n\n" heading (string-trim res))))))
-      (insert "* Passed\n")
-      (dolist (sec sections)
-        (pcase-let ((`(,heading ,status ,res) sec))
-          (when (eq status 'ok) (insert (format "- %s  %s\n" heading (string-trim (or res "")))))))
-      (when (> (+ running missing) 0)
-        (insert "\n* Not finished\n")
+    (let ((count (lambda (st) (seq-count (lambda (x) (eq (nth 2 x) st)) sections))))
+      (make-directory dir t)
+      (with-temp-file out
+        (insert (format "#+TITLE: %s report\n#+STARTUP: showall\n#+OPTIONS: ^:nil\n\n" name))
+        (insert (format "Run of =%s= at %s" name (format-time-string "%Y-%m-%d %H:%M")))
+        (when vars (insert (format " with =%s=" vars)))
+        (insert ".\n\n")
+        (insert (format "| Findings | Information | Passed | Running | Not run |\n|---|---|---|---|---|\n| %d | %d | %d | %d | %d |\n\n"
+                        (funcall count 'finding) (funcall count 'info) (funcall count 'pass) (funcall count 'running) (funcall count 'missing)))
+        (insert "| Area | Check | Status | Lines |\n|---|---|---|---|\n")
         (dolist (sec sections)
-          (pcase-let ((`(,heading ,status ,_) sec))
-            (when (memq status '(running missing)) (insert (format "- %s  (%s)\n" heading status)))))))
-    (let ((buf (find-file-noselect out)))
-      (with-current-buffer buf (revert-buffer t t t) (setq-local my/playbook--report-source src))
-      (if quiet
-          (message "report refreshed: %d findings, %d ok" findings ok)
-        (pop-to-buffer buf '((display-buffer-in-side-window) (side . right) (window-width . 0.5)))
-        (message "report: %s  (%d findings, %d ok)" (abbreviate-file-name out) findings ok)))))
+          (pcase-let ((`(,area ,check ,status ,_ ,n) sec))
+            (insert (format "| %s | %s | %s | %d |\n" area check
+                            (pcase status ('finding "FINDING") ('info "info") ('pass "ok") ('running "running") ('missing "not run")) n))))
+        (insert "\n")
+        (when (> (funcall count 'finding) 0)
+          (insert "* Findings\n")
+          (dolist (sec sections)
+            (pcase-let ((`(,area ,check ,status ,res ,_) sec))
+              (when (eq status 'finding)
+                (insert (format "** %s: %s\n#+begin_example\n%s\n#+end_example\n\n" area check (string-trim res)))))))
+        (when (> (funcall count 'info) 0)
+          (insert "* Information\n")
+          (dolist (sec sections)
+            (pcase-let ((`(,area ,check ,status ,res ,_) sec))
+              (when (eq status 'info)
+                (insert (format "** %s: %s\n#+begin_example\n%s\n#+end_example\n\n" area check (string-trim res)))))))
+        (when (> (funcall count 'pass) 0)
+          (insert "* Passed\n")
+          (dolist (sec sections)
+            (pcase-let ((`(,area ,check ,status ,res ,_) sec))
+              (when (eq status 'pass)
+                (insert (format "- %s: %s  %s\n" area check (string-trim (or res ""))))))))
+        (when (> (+ (funcall count 'running) (funcall count 'missing)) 0)
+          (insert "\n* Not finished\n")
+          (dolist (sec sections)
+            (pcase-let ((`(,area ,check ,status ,_ ,_) sec))
+              (when (memq status '(running missing))
+                (insert (format "- %s: %s  (%s)\n" area check (if (eq status 'running) "still running" "not run"))))))))
+      (let ((buf (find-file-noselect out)))
+        (with-current-buffer buf (revert-buffer t t t) (setq-local my/playbook--report-source src) (goto-char (point-min)))
+        (if quiet
+            (message "report refreshed: %d findings, %d info, %d ok" (funcall count 'finding) (funcall count 'info) (funcall count 'pass))
+          (pop-to-buffer buf '((display-buffer-in-side-window) (side . right) (window-width . 0.5)))
+          (message "report: %s  (%d findings, %d info, %d ok)" (abbreviate-file-name out) (funcall count 'finding) (funcall count 'info) (funcall count 'pass)))))))
 (defvar-local my/playbook--report-source nil "Playbook file this report was built from.")
 (defun my/playbook--refresh-open-reports ()
   "Rebuild every report buffer that is currently open, from its playbook."
@@ -203,6 +241,55 @@ With QUIET, refresh the report buffer without changing windows or focus."
 (advice-add 'org-babel-execute-src-block :after #'my/playbook--start-progress)
 (add-to-list 'global-mode-string '(:eval my/playbook--progress) t)
 
+;;; Set a playbook variable (account, region, group ...) with completion.
+(defun my/playbook--var-candidates (var)
+  (pcase var
+    ((or "P" "P1" "P2" "AWS") (my/aws-profiles))
+    ((or "R" "REGION") '("ap-southeast-1" "ap-southeast-2" "ap-southeast-5" "us-east-1" "eu-central-1" "eu-west-3"))
+    (_ nil)))
+(defun my/playbook-set-var (var value)
+  "Change VAR to VALUE in this playbook's #+PROPERTY :var line.
+Prompts with the file's own variables; P/P1/P2 complete from ~/.aws/config profiles."
+  (interactive
+   (let* ((line (or (my/playbook--vars-line) (user-error "No :var line in this playbook")))
+          (pairs (let (acc (start 0)) (while (string-match "\\([A-Za-z_][A-Za-z0-9_]*\\)=\"\\([^\"]*\\)\"" line start) (push (cons (match-string 1 line) (match-string 2 line)) acc) (setq start (match-end 0))) (nreverse acc)))
+          (var (completing-read "Variable: " (mapcar (lambda (p) (format "%s=%s" (car p) (cdr p))) pairs) nil t))
+          (var (car (split-string var "="))))
+     (list var (completing-read (format "%s = " var) (my/playbook--var-candidates var) nil nil (alist-get var pairs nil nil #'string=)))))
+  (save-excursion
+    (goto-char (point-min))
+    (unless (re-search-forward (format "^#\\+PROPERTY: header-args[^\n]*:var [^\n]*\\b%s=\"[^\"]*\"" (regexp-quote var)) nil t)
+      (user-error "Variable %s not in the :var line" var))
+    (re-search-backward (format "%s=\"[^\"]*\"" (regexp-quote var)))
+    (replace-match (format "%s=\"%s\"" var value) t t)
+    (org-set-regexps-and-options)
+    (message "%s=%s (results below are from the previous value until you rerun)" var value)))
+
+(defun my/playbook-use-aws-profile ()
+  "Set this playbook's account variable(s) to the AWS profile you pick (P, or P1/P2)."
+  (interactive)
+  (let ((line (or (my/playbook--vars-line) (user-error "No :var line"))))
+    (cond ((string-match-p "\\bP=\"" line)
+           (my/playbook-set-var "P" (completing-read "AWS profile for P: " (my/aws-profiles) nil nil (getenv "AWS_PROFILE"))))
+          ((string-match-p "\\bP1=\"" line)
+           (my/playbook-set-var "P1" (completing-read "AWS profile for P1: " (my/aws-profiles) nil nil "s5-t1"))
+           (my/playbook-set-var "P2" (completing-read "AWS profile for P2: " (my/aws-profiles) nil nil "s5-t2")))
+          (t (user-error "This playbook has no account variable")))))
+
+(defun my/playbook-report-html ()
+  "Export today's report of this playbook to HTML and open it in the browser."
+  (interactive)
+  (let* ((src (or my/playbook--report-source buffer-file-name))
+         (name (file-name-base src))
+         (dir (expand-file-name "runs" (file-name-directory src)))
+         (org (expand-file-name (format "%s-%s.org" (format-time-string "%Y-%m-%d") name) dir))
+         (html (concat (file-name-sans-extension org) ".html")))
+    (unless (file-exists-p org) (user-error "No report yet; press , r first"))
+    (unless (executable-find "pandoc") (user-error "pandoc not found"))
+    (call-process "pandoc" nil nil nil "-s" "--metadata" (format "title=%s report" name)
+                  "-c" "https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" org "-o" html)
+    (browse-url (concat "file://" html))))
+
 (defun my/playbook-new (name &optional dir)
   "Create a playbook NAME from the template in DIR (default: first playbook dir)."
   (interactive
@@ -235,7 +322,10 @@ With QUIET, refresh the report buffer without changing windows or focus."
   (define-key org-mode-map (kbd "C-c p c") #'my/playbook-clear-results)
   (define-key org-mode-map (kbd "C-c p y") #'my/playbook-copy-block)
   (define-key org-mode-map (kbd "C-c p k") #'my/playbook-kill-session)
-  (define-key org-mode-map (kbd "C-c p r") #'my/playbook-report))
+  (define-key org-mode-map (kbd "C-c p r") #'my/playbook-report)
+  (define-key org-mode-map (kbd "C-c p v") #'my/playbook-set-var)
+  (define-key org-mode-map (kbd "C-c p A") #'my/playbook-use-aws-profile)
+  (define-key org-mode-map (kbd "C-c p R") #'my/playbook-report-html))
 
 (provide 'my-playbooks)
 ;;; my-playbooks.el ends here
