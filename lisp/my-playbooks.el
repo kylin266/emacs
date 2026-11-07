@@ -195,7 +195,13 @@ With QUIET, refresh the report buffer without changing windows or focus."
               (when (memq status '(running missing))
                 (insert (format "- %s: %s  (%s)\n" area check (if (eq status 'running) "still running" "not run"))))))))
       (let ((buf (find-file-noselect out)))
-        (with-current-buffer buf (revert-buffer t t t) (setq-local my/playbook--report-source src) (goto-char (point-min)))
+        (with-current-buffer buf
+          (revert-buffer t t t)
+          (setq-local my/playbook--report-source src)
+          (setq-local truncate-lines t)
+          (org-table-map-tables #'org-table-align t)
+          (let ((inhibit-message t)) (save-buffer))
+          (goto-char (point-min)))
         (if quiet
             (message "report refreshed: %d findings, %d info, %d ok" (funcall count 'finding) (funcall count 'info) (funcall count 'pass))
           (pop-to-buffer buf '((display-buffer-in-side-window) (side . right) (window-width . 0.5)))
