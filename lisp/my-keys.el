@@ -198,6 +198,13 @@ commands open their buffers elsewhere."
         (with-current-buffer buf (read-only-mode 1) (markdown-mode) (setq-local truncate-lines nil) (visual-line-mode 1))
         (select-window w)))))
 
+(my/local-leader
+  :keymaps '(image-mode-map)
+  "p" '(browse-url-of-file :wk "open in browser")
+  "+" '(image-increase-size :wk "zoom in")
+  "-" '(image-decrease-size :wk "zoom out")
+  "0" '(image-transform-reset-to-initial :wk "reset zoom"))
+
 ;; Small helpers the map refers to.
 (defun my/find-in-emacs-dir ()
   (interactive)
