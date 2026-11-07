@@ -247,28 +247,37 @@ With QUIET, refresh the report buffer without changing windows or focus."
     ((or "P" "P1" "P2" "AWS") (my/aws-profiles))
     ((or "R" "REGION") '("ap-southeast-1" "ap-southeast-2" "ap-southeast-5" "us-east-1" "eu-central-1" "eu-west-3"))
     (_ nil)))
+(defun my/playbook--source-buffer ()
+  "The playbook buffer for the current context: this buffer, or the playbook a report was built from."
+  (cond ((and (boundp 'my/playbook--report-source) my/playbook--report-source)
+         (or (get-file-buffer my/playbook--report-source) (find-file-noselect my/playbook--report-source)))
+        (t (current-buffer))))
+
 (defun my/playbook-set-var (var value)
   "Change VAR to VALUE in this playbook's #+PROPERTY :var line.
-Prompts with the file's own variables; P/P1/P2 complete from ~/.aws/config profiles."
+Prompts with the file's own variables; P/P1/P2 complete from ~/.aws/config profiles.
+Works from the playbook or from its report page."
   (interactive
-   (let* ((line (or (my/playbook--vars-line) (user-error "No :var line in this playbook")))
+   (let* ((line (with-current-buffer (my/playbook--source-buffer)
+                  (or (my/playbook--vars-line) (user-error "No :var line in this playbook (are you in a playbook or its report?)"))))
           (pairs (let (acc (start 0)) (while (string-match "\\([A-Za-z_][A-Za-z0-9_]*\\)=\"\\([^\"]*\\)\"" line start) (push (cons (match-string 1 line) (match-string 2 line)) acc) (setq start (match-end 0))) (nreverse acc)))
           (var (completing-read "Variable: " (mapcar (lambda (p) (format "%s=%s" (car p) (cdr p))) pairs) nil t))
           (var (car (split-string var "="))))
      (list var (completing-read (format "%s = " var) (my/playbook--var-candidates var) nil nil (alist-get var pairs nil nil #'string=)))))
-  (save-excursion
-    (goto-char (point-min))
-    (unless (re-search-forward (format "^#\\+PROPERTY: header-args[^\n]*:var [^\n]*\\b%s=\"[^\"]*\"" (regexp-quote var)) nil t)
-      (user-error "Variable %s not in the :var line" var))
-    (re-search-backward (format "%s=\"[^\"]*\"" (regexp-quote var)))
-    (replace-match (format "%s=\"%s\"" var value) t t)
-    (org-set-regexps-and-options)
-    (message "%s=%s (results below are from the previous value until you rerun)" var value)))
+  (with-current-buffer (my/playbook--source-buffer)
+    (save-excursion
+      (goto-char (point-min))
+      (unless (re-search-forward (format "^#\\+PROPERTY: header-args[^\n]*:var [^\n]*\\b%s=\"[^\"]*\"" (regexp-quote var)) nil t)
+        (user-error "Variable %s not in the :var line" var))
+      (re-search-backward (format "%s=\"[^\"]*\"" (regexp-quote var)))
+      (replace-match (format "%s=\"%s\"" var value) t t)
+      (org-set-regexps-and-options)
+      (message "%s=%s in %s (rerun the playbook for new results)" var value (buffer-name)))))
 
 (defun my/playbook-use-aws-profile ()
   "Set this playbook's account variable(s) to the AWS profile you pick (P, or P1/P2)."
   (interactive)
-  (let ((line (or (my/playbook--vars-line) (user-error "No :var line"))))
+  (let ((line (with-current-buffer (my/playbook--source-buffer) (or (my/playbook--vars-line) (user-error "No :var line")))))
     (cond ((string-match-p "\\bP=\"" line)
            (my/playbook-set-var "P" (completing-read "AWS profile for P: " (my/aws-profiles) nil nil (getenv "AWS_PROFILE"))))
           ((string-match-p "\\bP1=\"" line)
