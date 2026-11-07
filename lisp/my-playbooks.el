@@ -88,15 +88,28 @@ results, and tools see no terminal so they never page."
   (interactive)
   (org-babel-remove-result-one-or-many t))
 
+(defun my/playbook--session-names ()
+  "Session buffer names declared by the open playbooks (:session in #+PROPERTY lines and blocks)."
+  (let (names)
+    (dolist (b (buffer-list))
+      (with-current-buffer b
+        (when (and (derived-mode-p 'org-mode) (my/playbook-in-playbook-dir-p))
+          (save-excursion
+            (goto-char (point-min))
+            (while (re-search-forward ":session \\([^ \t\n]+\\)" nil t)
+              (let ((n (match-string-no-properties 1))) (unless (member n names) (push n names))))))))
+    (cons "*playbook*" names)))
+
 (defun my/playbook-kill-session ()
   "Kill the background shell a playbook runs in (stops a runaway block)."
   (interactive)
   (let* ((info (org-babel-get-src-block-info t))
          (session (and info (cdr (assq :session (nth 2 info)))))
+         (names (my/playbook--session-names))
          (killed 0))
     (dolist (b (buffer-list))
       (when (and (or (and session (not (string= session "none")) (string= (buffer-name b) session))
-                     (string-match-p "\\`\\*\\(playbook\\)" (buffer-name b)))
+                     (member (buffer-name b) names))
                  (get-buffer-process b))
         (delete-process (get-buffer-process b))
         (kill-buffer b)
