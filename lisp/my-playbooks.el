@@ -113,9 +113,10 @@ results, and tools see no terminal so they never page."
               ((stringp r) r)
               (t (format "%S" r)))))))
 
-(defun my/playbook-report ()
+(defun my/playbook-report (&optional quiet)
   "Gather every block's result in this playbook into a dated report and open it beside.
-Report goes to runs/<date>-<playbook>.org next to the playbook (never committed)."
+Report goes to runs/<date>-<playbook>.org next to the playbook (never committed).
+With QUIET, refresh the report buffer without changing windows or focus."
   (interactive)
   (unless (derived-mode-p 'org-mode) (user-error "Not in a playbook"))
   (let* ((src buffer-file-name)
@@ -155,9 +156,18 @@ Report goes to runs/<date>-<playbook>.org next to the playbook (never committed)
           (pcase-let ((`(,heading ,status ,_) sec))
             (when (memq status '(running missing)) (insert (format "- %s  (%s)\n" heading status)))))))
     (let ((buf (find-file-noselect out)))
-      (with-current-buffer buf (revert-buffer t t t))
-      (pop-to-buffer buf '((display-buffer-in-side-window) (side . right) (window-width . 0.5)))
-      (message "report: %s  (%d findings, %d ok)" (abbreviate-file-name out) findings ok))))
+      (with-current-buffer buf (revert-buffer t t t) (setq-local my/playbook--report-source src))
+      (if quiet
+          (message "report refreshed: %d findings, %d ok" findings ok)
+        (pop-to-buffer buf '((display-buffer-in-side-window) (side . right) (window-width . 0.5)))
+        (message "report: %s  (%d findings, %d ok)" (abbreviate-file-name out) findings ok)))))
+(defvar-local my/playbook--report-source nil "Playbook file this report was built from.")
+(defun my/playbook--refresh-open-reports ()
+  "Rebuild every report buffer that is currently open, from its playbook."
+  (dolist (b (buffer-list))
+    (let ((src (buffer-local-value (quote my/playbook--report-source) b)))
+      (when (and src (get-buffer-window b t) (get-file-buffer src))
+        (with-current-buffer (get-file-buffer src) (my/playbook-report t))))))
 
 ;;; Progress in the modeline while blocks run in the background.
 (defvar my/playbook--timer nil)
@@ -185,6 +195,7 @@ Report goes to runs/<date>-<playbook>.org next to the playbook (never committed)
     (force-mode-line-update t)
     (unless any-pending
       (when my/playbook--timer (cancel-timer my/playbook--timer) (setq my/playbook--timer nil))
+      (my/playbook--refresh-open-reports)
       (message "playbook: all blocks finished (, r for the report)"))))
 (defun my/playbook--start-progress (&rest _)
   (when (and buffer-file-name (my/playbook-in-playbook-dir-p) (not my/playbook--timer))
