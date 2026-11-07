@@ -198,6 +198,9 @@ commands open their buffers elsewhere."
         (with-current-buffer buf (read-only-mode 1) (markdown-mode) (setq-local truncate-lines nil) (visual-line-mode 1))
         (select-window w)))))
 
+;; evil-collection binds "," in image-mode; free it for the local leader.
+(with-eval-after-load 'image-mode
+  (evil-define-key 'normal image-mode-map (kbd ",") nil))
 (my/local-leader
   :keymaps '(image-mode-map)
   "p" '(browse-url-of-file :wk "open in browser")
