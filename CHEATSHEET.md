@@ -43,6 +43,7 @@ normal mode, `C-g` cancels whatever Emacs is doing.
 - `SPC f d` dired here. `SPC f y` copy file path. `SPC f R` rename. `SPC f D` delete.
 - `SPC f e` open init.el, `SPC f l` local.el, `SPC f p` any file of the Emacs config.
 - `SPC ,` or `SPC b b` switch buffer. `SPC b d` kill buffer. `SPC b n` / `SPC b p` next / previous.
+- `s-T` or `SPC b T` reopen the last killed file at the same spot, like a browser tab. Repeat to go further back.
 - `` SPC ` `` last buffer. `SPC x` scratch buffer (org).
 - `SPC w v` split right, `SPC w s` split below, `SPC w d` close window, `SPC w m` maximise.
 - `SPC w h j k l` focus window, `SPC w H J K L` move the window, `SPC w =` balance.

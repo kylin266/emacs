@@ -17,6 +17,7 @@
   "br" 'revert-buffer-quick "bR" 'rename-buffer
   "bs" 'save-buffer "bS" 'save-some-buffers
   "bi" 'ibuffer "bu" 'vundo
+  "bT" '(my/reopen-killed-file :wk "reopen killed file")
 
   "f"  '(:ignore t :wk "file")
   "ff" 'find-file "fF" 'find-file-other-window
@@ -244,6 +245,7 @@ commands open their buffers elsewhere."
 (global-set-key (kbd "s-P") #'execute-extended-command)
 (global-set-key (kbd "s-F") #'consult-ripgrep)
 (global-set-key (kbd "s-b") #'consult-buffer)
+(global-set-key (kbd "s-T") #'my/reopen-killed-file)   ; like browser reopen-closed-tab
 (global-set-key (kbd "s-`") #'other-frame)
 (global-set-key (kbd "s-o") #'other-window)   ; works inside terminal panes too
 (global-set-key (kbd "<escape>") #'keyboard-escape-quit)

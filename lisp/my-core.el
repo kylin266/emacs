@@ -82,6 +82,31 @@
 (savehist-mode 1)
 (recentf-mode 1)
 (setq recentf-max-saved-items 300)
+;; Reopen killed file buffers, browser-style (s-T / , b T).
+(defvar my/killed-files nil "Ring of (FILE . POINT) for killed file buffers, newest first.")
+(defvar my/killed-files-max 50)
+
+(defun my/remember-killed-file ()
+  (when buffer-file-name
+    (setq my/killed-files
+          (cons (cons buffer-file-name (point))
+                (seq-remove (lambda (e) (equal (car e) buffer-file-name))
+                            my/killed-files)))
+    (when (> (length my/killed-files) my/killed-files-max)
+      (setcdr (nthcdr (1- my/killed-files-max) my/killed-files) nil))))
+(add-hook 'kill-buffer-hook #'my/remember-killed-file)
+
+(defun my/reopen-killed-file ()
+  "Reopen the most recently killed file buffer in this window, restoring point.
+Repeat to go further back. Skips files that no longer exist."
+  (interactive)
+  (let (entry)
+    (while (and (setq entry (pop my/killed-files))
+                (not (file-exists-p (car entry)))))
+    (unless entry (user-error "No killed file buffers to reopen"))
+    (find-file (car entry))
+    (goto-char (min (cdr entry) (point-max)))
+    (message "Reopened %s (%d more)" (abbreviate-file-name (car entry)) (length my/killed-files))))
 (electric-pair-mode 1)
 (delete-selection-mode 1)
 (global-so-long-mode 1)
