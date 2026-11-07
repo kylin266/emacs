@@ -125,12 +125,15 @@ results, and tools see no terminal so they never page."
   "Classify a block from its BODY and result RES.
 A block whose body prints an \"(empty = ...)\" or \"(... )\" pass line is a check:
 pass when the result is only such lines, finding otherwise. A block without one
-is information. Return one of finding info pass running missing."
+is information, unless a result line carries the \" !!\" threshold marker (a
+status board row over its limit): then it is a finding too.
+Return one of finding info pass running missing."
   (let* ((lines (and res (seq-remove #'string-empty-p (mapcar #'string-trim (split-string res "\n")))))
          (sentinel (string-match-p "echo \"(" body)))
     (cond ((null res) 'missing)
           ((and (= (length lines) 1) (string-match-p "\\`[0-9a-f-]\\{32,36\\}\\'" (car lines))) 'running)
           ((null lines) (if sentinel 'pass 'info))
+          ((seq-some (lambda (l) (string-match-p " !!\\'" l)) lines) 'finding)
           ((and sentinel (seq-every-p (lambda (l) (or (string-prefix-p "(" l) (string-prefix-p "==" l))) lines)) 'pass)
           (sentinel 'finding)
           (t 'info))))
