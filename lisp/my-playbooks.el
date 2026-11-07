@@ -159,6 +159,39 @@ Report goes to runs/<date>-<playbook>.org next to the playbook (never committed)
       (pop-to-buffer buf '((display-buffer-in-side-window) (side . right) (window-width . 0.5)))
       (message "report: %s  (%d findings, %d ok)" (abbreviate-file-name out) findings ok))))
 
+;;; Progress in the modeline while blocks run in the background.
+(defvar my/playbook--timer nil)
+(defvar my/playbook--progress "" "Modeline text, e.g. \" ▶ s5-domain 5/16\".")
+(defun my/playbook--counts (buf)
+  "Return (DONE . PENDING) result counts for playbook buffer BUF."
+  (with-current-buffer buf
+    (save-excursion
+      (goto-char (point-min))
+      (let ((done 0) (pending 0))
+        (while (re-search-forward "^#\\+results:\n\\(?:: \\([0-9a-f-]\\{32,36\\}\\)$\\|\\(: \\|\\[\\[file:\\|#\\+begin_example\\)\\)" nil t)
+          (if (match-string 1) (setq pending (1+ pending)) (setq done (1+ done))))
+        (cons done pending)))))
+(defun my/playbook--refresh-progress ()
+  (let (parts (any-pending nil))
+    (dolist (b (buffer-list))
+      (when (buffer-live-p b)
+        (with-current-buffer b
+          (when (and buffer-file-name (derived-mode-p 'org-mode) (my/playbook-in-playbook-dir-p))
+            (let* ((c (my/playbook--counts b)) (done (car c)) (pending (cdr c)))
+              (when (> pending 0)
+                (setq any-pending t)
+                (push (format "▶ %s %d/%d" (file-name-base buffer-file-name) done (+ done pending)) parts)))))))
+    (setq my/playbook--progress (if parts (concat " " (string-join (nreverse parts) " ")) ""))
+    (force-mode-line-update t)
+    (unless any-pending
+      (when my/playbook--timer (cancel-timer my/playbook--timer) (setq my/playbook--timer nil))
+      (message "playbook: all blocks finished (, r for the report)"))))
+(defun my/playbook--start-progress (&rest _)
+  (when (and buffer-file-name (my/playbook-in-playbook-dir-p) (not my/playbook--timer))
+    (setq my/playbook--timer (run-at-time 1 2 #'my/playbook--refresh-progress))))
+(advice-add 'org-babel-execute-src-block :after #'my/playbook--start-progress)
+(add-to-list 'global-mode-string '(:eval my/playbook--progress) t)
+
 (defun my/playbook-new (name &optional dir)
   "Create a playbook NAME from the template in DIR (default: first playbook dir)."
   (interactive
