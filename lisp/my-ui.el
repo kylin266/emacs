@@ -53,7 +53,7 @@
 (setq display-line-numbers-type t
       display-line-numbers-width 3
       frame-title-format '("%b" (:eval (when buffer-file-name (concat "  ·  " (abbreviate-file-name default-directory)))))
-      window-divider-default-right-width 1
+      window-divider-default-right-width 4   ; wide enough to grab with the trackpad (drag to resize)
       split-width-threshold 160)
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
 (add-hook 'yaml-mode-hook #'display-line-numbers-mode)
@@ -68,6 +68,8 @@
 (setq mouse-wheel-scroll-amount '(2 ((shift) . 8) ((control) . nil))
       mouse-wheel-progressive-speed nil
       mouse-wheel-follow-mouse t
+      mouse-wheel-tilt-scroll t         ; sideways swipe scrolls truncated lines
+      mouse-wheel-flip-direction t      ; natural direction, like macOS
       scroll-step 1
       scroll-preserve-screen-position t
       auto-window-vscroll nil
