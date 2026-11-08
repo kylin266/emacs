@@ -225,6 +225,7 @@ cannot change state: `evil-state' is let-bound while they run)."
 (defun my/treemacs-toggle ()
   "Show the tree for the current project (or folder), or hide it."
   (interactive)
+  (require 'treemacs)                   ; the visibility query is not autoloaded
   (pcase (treemacs-current-visibility)
     ('visible (delete-window (treemacs-get-local-window)))
     (_ (if (project-current)
