@@ -61,6 +61,17 @@ results, and tools see no terminal so they never page."
       (org-babel-lob-ingest lib))))
 (add-hook 'org-mode-hook #'my/playbook-ingest-libs)
 
+(defvar my/playbook-text-scale -1
+  "Text scale step for playbook buffers and their reports (see `text-scale-set').
+-1 is one step below the frame font, so the 100-column text charts fit a half-screen
+window.  0 leaves the font alone.  s-= / s-- still adjust a buffer by hand.")
+
+(defun my/playbook--shrink ()
+  "Open playbooks (and reports under runs/) at `my/playbook-text-scale'."
+  (when (and (/= my/playbook-text-scale 0) (my/playbook-in-playbook-dir-p))
+    (text-scale-set my/playbook-text-scale)))
+(add-hook 'org-mode-hook #'my/playbook--shrink)
+
 (defun my/playbook-confirm (lang _body)
   "Ask before evaluating unless this is a shell block inside a playbook."
   (not (and (member lang '("sh" "shell" "bash"))
